@@ -61,7 +61,7 @@ import VoiceRecorder from '~/components/lapor/VoiceRecorder.vue'
 import PhotoUpload from '~/components/lapor/PhotoUpload.vue'
 import { useGeolocation } from '~/composables/useGeolocation'
 
-const { getCoordinates } = useGeolocation()
+const { capture } = useGeolocation()
 
 const audioBlob = ref<Blob | null>(null)
 const photoFile = ref<File | null>(null)
@@ -76,7 +76,7 @@ async function submitReport() {
   isSubmitting.value = true
   
   try {
-    const coords = await getCoordinates().catch(() => ({ lat: 0, lng: 0 }))
+    const coords = await capture().catch(() => ({ lat: 0, lng: 0 }))
     const formData = new FormData()
     
     formData.append('audio', audioBlob.value, 'report.webm')

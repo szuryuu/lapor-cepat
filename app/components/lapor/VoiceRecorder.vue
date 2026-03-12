@@ -3,7 +3,7 @@
     <div class="w-full bg-white border-4 border-black p-8 md:p-16 flex flex-col items-center justify-center shadow-[12px_12px_0px_0px_rgba(0,0,0,1)] relative transition-colors duration-500" :class="{ 'bg-red-50 border-red-500': isRecording }">
       <div v-if="isRecording" class="absolute top-6 right-6 flex items-center gap-2 bg-white px-3 py-1 border-2 border-black">
         <span class="w-3 h-3 bg-red-600 rounded-full animate-ping"></span>
-        <span class="font-mono font-bold text-red-600 text-sm">REC {{ recordingTime }}s</span>
+        <span class="font-mono font-bold text-red-600 text-sm">REC {{ duration }}s</span>
       </div>
 
       <button
@@ -27,20 +27,20 @@
       </p>
     </div>
 
-    <div v-if="errorMsg" class="w-full bg-red-100 border-4 border-black p-4 text-red-900 font-mono font-bold flex items-start gap-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+    <div v-if="errorMsg || recorderError" class="w-full bg-red-100 border-4 border-black p-4 text-red-900 font-mono font-bold flex items-start gap-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
       <AlertOctagon class="w-6 h-6 shrink-0 mt-0.5" />
-      <p>{{ errorMsg }}</p>
+      <p>{{ errorMsg || recorderError }}</p>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { Mic, AlertOctagon } from 'lucide-vue-next'
 import { useVoiceRecorder } from '~/composables/useVoiceRecorder'
 
 const emit = defineEmits<{ 'audio-ready': [Blob] }>()
-const { startRecord, stopRecord, isRecording, recordingTime } = useVoiceRecorder()
+const { start, stop, isRecording, duration, error: recorderError, audioBlob } = useVoiceRecorder()
 
 const hasRecorded = ref(false)
 const errorMsg = ref('')
@@ -53,33 +53,31 @@ const statusText = computed(() => {
 
 async function startRecording() {
   errorMsg.value = ''
+  hasRecorded.value = false
   try {
-    await startRecord()
+    await start()
     if (typeof navigator !== 'undefined' && 'vibrate' in navigator) navigator.vibrate(50)
   } catch (e: any) {
-    errorMsg.value = 'Akses mikrofon ditolak atau gagal dimulai.'
+    errorMsg.value = 'Akses mikrofon ditolak atau hardware tidak ditemukan.'
   }
 }
 
-async function stopRecording() {
+function stopRecording() {
   if (!isRecording.value) return
-  await processAudio()
+  stop()
 }
 
-async function handleMouseLeave() {
+function handleMouseLeave() {
   if (isRecording.value) {
-    await processAudio()
+    stop()
   }
 }
 
-async function processAudio() {
-  if (typeof navigator !== 'undefined' && 'vibrate' in navigator) navigator.vibrate([50, 100, 50])
-  try {
-    const audioBlob = await stopRecord()
+watch(audioBlob, (newBlob) => {
+  if (newBlob) {
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) navigator.vibrate([50, 100, 50])
     hasRecorded.value = true
-    emit('audio-ready', audioBlob)
-  } catch (e: any) {
-    errorMsg.value = 'Gagal menyimpan rekaman.'
+    emit('audio-ready', newBlob)
   }
-}
+})
 </script>
