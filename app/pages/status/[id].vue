@@ -1,55 +1,47 @@
 <template>
-  <div class="min-h-screen flex flex-col">
-    <header class="flex items-center gap-4 px-6 py-4 border-b-4 border-black bg-white sticky top-0 z-10 shadow-[0_4px_0_0_rgba(0,0,0,1)]">
-      <NuxtLink to="/" class="w-10 h-10 bg-white border-2 border-black flex items-center justify-center hover:bg-black hover:text-white transition-colors cursor-pointer">
-        <ArrowLeft class="w-6 h-6" />
+  <div class="min-h-screen flex flex-col bg-slate-100 font-sans antialiased">
+    <header class="bg-white border-b-2 border-slate-900 px-4 py-4 flex items-center gap-4 sticky top-0 z-40">
+      <NuxtLink to="/" class="bg-slate-900 hover:bg-black text-white p-2 transition-colors">
+        <ArrowLeft class="w-5 h-5" />
       </NuxtLink>
-      <span class="font-black text-xl uppercase tracking-tighter">Status Laporan</span>
+      <span class="font-black text-lg uppercase tracking-tight text-slate-900">Status Operasi</span>
     </header>
 
-    <div class="flex-1 px-4 py-10 max-w-lg mx-auto w-full">
-      <div v-if="report" class="flex flex-col gap-8">
-        
-        <div class="bg-white border-4 border-black p-8 shadow-[8px_8px_0px_0px_rgba(0,0,0,1)]">
-          <div class="flex flex-col gap-8 relative">
-            <div class="absolute left-6 top-2 bottom-2 w-1 bg-black"></div>
-            
-            <div v-for="(item, index) in timeline" :key="item.key" class="flex items-center gap-6 relative z-10">
-              <div class="w-12 h-12 shrink-0 border-4 border-black rounded-full flex items-center justify-center transition-colors duration-500" :class="isReached(item.key) ? item.bgColor : 'bg-white'">
-                <component :is="item.icon" class="w-6 h-6" :class="isReached(item.key) ? 'text-white' : 'text-gray-300'" />
-              </div>
-              <div class="flex flex-col">
-                <span class="font-black uppercase tracking-widest text-lg" :class="isReached(item.key) ? 'text-black' : 'text-gray-400'">{{ item.title }}</span>
-                <span class="font-mono font-bold text-xs" :class="isReached(item.key) ? 'text-gray-600' : 'text-gray-300'">{{ item.desc }}</span>
-              </div>
+    <main class="flex-1 p-4 max-w-md mx-auto w-full flex flex-col gap-6 py-8">
+      <div v-if="report" class="bg-white border-2 border-slate-900 p-6 flex flex-col gap-8 relative overflow-hidden">
+        <div class="absolute top-0 right-0 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 uppercase tracking-widest">
+          ID:{{ report.id.split('-')[0] }}
+        </div>
+
+        <div class="relative pl-10 flex flex-col gap-8 mt-4">
+          <div class="absolute left-3.5 top-2 bottom-2 w-0.5 bg-slate-200"></div>
+          
+          <div v-for="item in timeline" :key="item.key" class="relative z-10 flex flex-col gap-1">
+            <div class="absolute -left-10 w-7 h-7 bg-white border-2 flex items-center justify-center" :class="isReached(item.key) ? item.borderColor : 'border-slate-300'">
+              <component :is="item.icon" class="w-4 h-4" :class="isReached(item.key) ? item.iconColor : 'text-slate-300'" />
             </div>
+            <span class="text-sm font-black uppercase tracking-tight" :class="isReached(item.key) ? 'text-slate-900' : 'text-slate-400'">{{ item.title }}</span>
+            <span class="text-xs font-bold text-slate-500 uppercase tracking-widest" :class="isReached(item.key) ? 'text-slate-600' : 'text-slate-400'">{{ item.desc }}</span>
           </div>
         </div>
-
-        <div class="bg-yellow-300 border-4 border-black p-5 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <div class="flex flex-col gap-3">
-            <div class="flex justify-between items-center border-b-2 border-black pb-2">
-              <span class="font-bold text-xs uppercase text-black/70">ID Unik</span>
-              <span class="font-mono font-black text-sm">{{ report.id.split('-')[0] }}</span>
-            </div>
-            <div class="flex justify-between items-center border-b-2 border-black pb-2">
-              <span class="font-bold text-xs uppercase text-black/70">Tipe Bencana</span>
-              <span class="font-black uppercase">{{ report.disasterType }}</span>
-            </div>
-            <div class="flex justify-between items-start pt-1">
-              <span class="font-bold text-xs uppercase text-black/70 shrink-0">Lokasi</span>
-              <span class="font-black uppercase text-right leading-tight max-w-[200px]">{{ report.locationText }}</span>
-            </div>
-          </div>
-        </div>
-
-        <div class="flex items-center justify-center gap-2 font-mono text-xs font-bold text-gray-500">
-          <RefreshCw class="w-4 h-4 animate-spin-slow" />
-          <span>Auto-sync aktif (10s)</span>
-        </div>
-
       </div>
-    </div>
+
+      <div v-if="report" class="bg-white border-2 border-slate-900 p-5 flex flex-col gap-3">
+        <div class="flex justify-between items-center pb-3 border-b-2 border-slate-100">
+          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Klasifikasi Bencana</span>
+          <span class="text-xs font-black text-slate-900 uppercase tracking-widest">{{ report.disasterType }}</span>
+        </div>
+        <div class="flex justify-between items-start pt-1">
+          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest shrink-0 mt-0.5">Titik Lokasi</span>
+          <span class="text-sm font-black text-slate-900 uppercase text-right leading-tight max-w-[200px]">{{ report.locationText }}</span>
+        </div>
+      </div>
+
+      <div class="flex items-center justify-center gap-2 mt-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
+        <RefreshCw class="w-3.5 h-3.5 animate-spin-slow" />
+        SINKRONISASI SATELIT (10S)
+      </div>
+    </main>
   </div>
 </template>
 
@@ -60,22 +52,17 @@ import type { Report } from '~/types/report'
 
 const route = useRoute()
 const { data: report, refresh } = await useFetch<Report>(`/api/reports/${route.params.id}`)
-
-useSeoMeta({ title: 'Lacak Status — BPBD' })
+useSeoMeta({ title: 'Status Operasi — LaporCepat' })
 
 const timeline = [
-  { key: 'PENDING', icon: CheckCircle, bgColor: 'bg-yellow-500', title: 'Terverifikasi AI', desc: 'Laporan masuk antrean TRC' },
-  { key: 'VERIFIED', icon: CheckCircle, bgColor: 'bg-blue-500', title: 'Diterima Komandan', desc: 'TRC menganalisis prioritas' },
-  { key: 'DISPATCHED', icon: Truck, bgColor: 'bg-red-500', title: 'TRC Berangkat', desc: 'Bantuan menuju lokasi Anda' },
-  { key: 'RESOLVED', icon: Flag, bgColor: 'bg-green-500', title: 'Selesai', desc: 'Situasi terkendali' },
+  { key: 'PENDING', icon: CheckCircle, borderColor: 'border-yellow-500', iconColor: 'text-yellow-600', title: 'Verifikasi Sistem', desc: 'Validasi AI Selesai' },
+  { key: 'VERIFIED', icon: CheckCircle, borderColor: 'border-blue-600', iconColor: 'text-blue-600', title: 'Diterima Komando', desc: 'Triage BPBD' },
+  { key: 'DISPATCHED', icon: Truck, borderColor: 'border-red-600', iconColor: 'text-red-600', title: 'TRC Berangkat', desc: 'Menuju Koordinat' },
+  { key: 'RESOLVED', icon: Flag, borderColor: 'border-green-600', iconColor: 'text-green-600', title: 'Terkendali', desc: 'Operasi Selesai' },
 ]
 
 const statusOrder = ['PENDING', 'VERIFIED', 'DISPATCHED', 'RESOLVED']
-
-function isReached(key: string) {
-  if (!report.value) return false
-  return statusOrder.indexOf(report.value.status) >= statusOrder.indexOf(key)
-}
+const isReached = (key: string) => report.value && statusOrder.indexOf(report.value.status) >= statusOrder.indexOf(key)
 
 onMounted(() => {
   const interval = setInterval(refresh, 10000)

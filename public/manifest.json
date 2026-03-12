@@ -1,0 +1,16 @@
+{
+  "name": "LaporCepat Darurat",
+  "short_name": "LaporCepat",
+  "description": "Sistem Pelaporan Darurat Bencana BPBD Terintegrasi AI",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "192x192",
+      "type": "image/x-icon"
+    }
+  ]
+}

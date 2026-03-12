@@ -1,24 +1,24 @@
 <template>
-  <div class="min-h-screen bg-[#f4f4f0] text-black font-sans selection:bg-yellow-300">
-    <header class="bg-white border-b-4 border-black px-6 py-4 flex items-center justify-between sticky top-0 z-50">
-      <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-red-500 border-2 border-black flex items-center justify-center shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <ShieldAlert class="w-5 h-5 text-white" />
+  <div class="min-h-screen bg-slate-200 text-slate-900 font-sans antialiased flex flex-col">
+    <header class="bg-slate-900 border-b-4 border-red-600 sticky top-0 z-40">
+      <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="bg-white p-1">
+            <ShieldAlert class="w-5 h-5 text-slate-900" />
+          </div>
+          <span class="font-black text-lg tracking-widest uppercase text-white">BPBD <span class="text-slate-400">TRC</span></span>
         </div>
-        <span class="font-black text-xl tracking-tighter uppercase">BPBD <span class="text-red-500">COMMAND</span></span>
-      </div>
-      <div class="flex gap-3">
-        <NuxtLink to="/dashboard" exact-active-class="!bg-black !text-white shadow-[4px_4px_0px_0px_rgba(255,0,0,1)]" class="flex items-center gap-2 px-4 py-2 border-2 border-black font-bold text-sm uppercase transition-all bg-white hover:bg-gray-100 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <List class="w-4 h-4" />
-          <span class="hidden md:inline">Antrean</span>
-        </NuxtLink>
-        <NuxtLink to="/dashboard/peta" exact-active-class="!bg-black !text-white shadow-[4px_4px_0px_0px_rgba(255,0,0,1)]" class="flex items-center gap-2 px-4 py-2 border-2 border-black font-bold text-sm uppercase transition-all bg-white hover:bg-gray-100 hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
-          <Map class="w-4 h-4" />
-          <span class="hidden md:inline">Peta</span>
-        </NuxtLink>
+        <nav class="flex items-center gap-2">
+          <NuxtLink to="/dashboard" exact-active-class="bg-slate-800 text-white border-slate-700" class="flex items-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white transition-colors border border-transparent">
+            <List class="w-4 h-4" /> <span class="hidden sm:inline">Antrean</span>
+          </NuxtLink>
+          <NuxtLink to="/dashboard/peta" exact-active-class="bg-slate-800 text-white border-slate-700" class="flex items-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white transition-colors border border-transparent">
+            <Map class="w-4 h-4" /> <span class="hidden sm:inline">Peta</span>
+          </NuxtLink>
+        </nav>
       </div>
     </header>
-    <main class="max-w-6xl mx-auto w-full px-4 py-8">
+    <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1">
       <slot />
     </main>
   </div>
