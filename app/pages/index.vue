@@ -38,7 +38,7 @@
         </div>
         <Mic class="w-8 h-8 text-slate-900 group-hover:text-red-700" />
       </NuxtLink>
-      <NuxtLink to="/dashboard" class="flex-1 bg-slate-900 hover:bg-black border-2 border-slate-900 p-6 flex items-center justify-between transition-colors group">
+      <NuxtLink to="/login" class="flex-1 bg-slate-900 hover:bg-black border-2 border-slate-900 p-6 flex items-center justify-between transition-colors group">
         <div class="flex flex-col">
           <span class="text-xl font-black uppercase tracking-tight text-white">Dashboard TRC</span>
           <span class="text-xs font-bold text-slate-400 uppercase tracking-widest mt-1">Akses BPBD</span>
@@ -50,5 +50,5 @@
 </template>
 
 <script setup lang="ts">
-import { ShieldAlert, Mic, Activity } from 'lucide-vue-next'
+import { Mic, Activity } from 'lucide-vue-next'
 </script>

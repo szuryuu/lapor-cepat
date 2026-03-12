@@ -8,7 +8,7 @@
           </div>
           <span class="text-xl font-black tracking-tighter uppercase text-slate-900">BPBD<span class="text-red-600">.</span>PORTAL</span>
         </NuxtLink>
-        <NuxtLink to="/dashboard" class="text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 transition-colors">
+        <NuxtLink to="/login" class="text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 transition-colors focus:outline-none focus:ring-2 focus:ring-black px-2 py-1">
           Akses Petugas
         </NuxtLink>
       </div>
