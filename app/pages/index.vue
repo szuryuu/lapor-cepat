@@ -1,33 +1,59 @@
-<script setup lang="ts">
-useSeoMeta({
-  title: 'Lapor Cepat — Sistem Pelaporan Bencana',
-  description: 'Laporkan bencana dengan cepat menggunakan AI',
-})
-</script>
-
 <template>
-  <div class="min-h-screen flex flex-col items-center justify-center px-6 py-12">
-    <div class="w-full max-w-sm flex flex-col items-center gap-10">
-      <div class="flex flex-col items-center gap-3 text-center">
-        <span class="text-7xl">🚨</span>
-        <h1 class="text-4xl font-black tracking-tight">LAPOR CEPAT</h1>
-        <p class="text-gray-500 text-sm leading-relaxed">
-          Sistem pelaporan bencana cerdas<br />berbasis AI untuk BPBD Indonesia
-        </p>
+  <div class="flex flex-col gap-16">
+    <section class="flex flex-col items-start md:items-center md:text-center gap-6">
+      <div class="inline-flex items-center gap-2 px-4 py-2 bg-yellow-300 border-2 border-black font-mono text-xs md:text-sm font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rotate-[-2deg]">
+        <Siren class="w-4 h-4" />
+        <span>SISTEM TRIAGE BENCANA AI</span>
       </div>
-
-      <div class="flex flex-col gap-3 w-full">
-        <NuxtLink to="/lapor" class="block">
-          <PUButton size="large" class="w-full">🆘 &nbsp; Laporkan Bencana</PUButton>
-        </NuxtLink>
-        <NuxtLink to="/dashboard" class="block">
-          <PUButton flavor="outlined" size="large" class="w-full">📋 &nbsp; Dashboard BPBD</PUButton>
-        </NuxtLink>
-      </div>
-
-      <p class="text-xs text-gray-400 text-center leading-relaxed">
-        Laporan diproses AI dalam &lt;5 detik<br />dan langsung masuk antrian petugas
+      
+      <h1 class="text-5xl md:text-7xl lg:text-8xl font-black uppercase leading-[1.1] tracking-tight">
+        Lapor Darurat <br />
+        <span class="bg-black text-white px-4 pb-2 pt-1 inline-block mt-2 rotate-[1deg]">Tanpa Ngetik.</span>
+      </h1>
+      
+      <p class="text-lg md:text-xl font-medium max-w-2xl border-l-4 border-red-500 pl-4 text-left mt-2">
+        Tekan tombol, bicara, dan sistem AI kami otomatis menerjemahkan kepanikan Anda menjadi data prioritas akurat untuk Tim BPBD.
       </p>
-    </div>
+    </section>
+
+    <section class="flex flex-col md:flex-row gap-6 md:gap-8">
+      <NuxtLink to="/lapor" class="flex-1 flex flex-col items-center justify-center gap-4 p-8 md:p-12 bg-red-500 text-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all group cursor-pointer">
+        <Mic class="w-16 h-16 md:w-20 md:h-20 group-hover:scale-110 transition-transform" />
+        <div class="text-center">
+          <h2 class="text-3xl md:text-4xl font-black uppercase mb-1">Buat Laporan</h2>
+          <p class="font-mono text-sm font-bold opacity-90 tracking-widest">WARGA DARURAT</p>
+        </div>
+      </NuxtLink>
+
+      <NuxtLink to="/dashboard" class="flex-1 flex flex-col items-center justify-center gap-4 p-8 md:p-12 bg-white border-4 border-black shadow-[8px_8px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[4px] hover:translate-y-[4px] hover:shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] transition-all group cursor-pointer">
+        <Activity class="w-16 h-16 md:w-20 md:h-20 text-black group-hover:scale-110 transition-transform" />
+        <div class="text-center">
+          <h2 class="text-3xl md:text-4xl font-black uppercase mb-1">TRC BPBD</h2>
+          <p class="font-mono text-sm font-bold text-gray-500 tracking-widest">MONITOR ANTREAN</p>
+        </div>
+      </NuxtLink>
+    </section>
+
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-12 border-t-4 border-black">
+      <div class="bg-white p-6 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <MapPin class="w-8 h-8 text-blue-500 mb-4" />
+        <h3 class="text-xl font-black uppercase mb-2">Auto GPS</h3>
+        <p class="text-sm font-medium text-gray-700">Sistem menarik koordinat akurat di latar belakang tanpa mengisi form alamat manual.</p>
+      </div>
+      <div class="bg-white p-6 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <BrainCircuit class="w-8 h-8 text-purple-500 mb-4" />
+        <h3 class="text-xl font-black uppercase mb-2">AI Extraction</h3>
+        <p class="text-sm font-medium text-gray-700">Mengubah ucapan tidak terstruktur menjadi tingkat prioritas evakuasi (Level 1-5).</p>
+      </div>
+      <div class="bg-white p-6 border-2 border-black shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <Zap class="w-8 h-8 text-yellow-500 mb-4" />
+        <h3 class="text-xl font-black uppercase mb-2">Real-Time</h3>
+        <p class="text-sm font-medium text-gray-700">Data terdistribusi seketika ke dashboard komando tanpa perlu me-refresh halaman.</p>
+      </div>
+    </section>
   </div>
 </template>
+
+<script setup lang="ts">
+import { Siren, Mic, Activity, MapPin, BrainCircuit, Zap } from 'lucide-vue-next'
+</script>
