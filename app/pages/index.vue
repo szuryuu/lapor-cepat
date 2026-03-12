@@ -1,5 +1,5 @@
 <template>
-  <div class="flex flex-col gap-16">
+  <div class="flex flex-col gap-10 md:gap-12">
     <section class="flex flex-col items-start md:items-center md:text-center gap-6">
       <div class="inline-flex items-center gap-2 px-4 py-2 bg-yellow-300 border-2 border-black font-mono text-xs md:text-sm font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] rotate-[-2deg]">
         <Siren class="w-4 h-4" />
@@ -14,6 +14,30 @@
       <p class="text-lg md:text-xl font-medium max-w-2xl border-l-4 border-red-500 pl-4 text-left mt-2">
         Tekan tombol, bicara, dan sistem AI kami otomatis menerjemahkan kepanikan Anda menjadi data prioritas akurat untuk Tim BPBD.
       </p>
+    </section>
+
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div class="bg-white border-4 border-black p-5 flex items-start gap-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <div class="w-12 h-12 shrink-0 bg-black text-white font-black text-2xl flex items-center justify-center">1</div>
+        <div class="flex-1">
+          <h3 class="font-black uppercase text-lg leading-tight mb-1">Izinkan Lokasi</h3>
+          <p class="text-sm font-bold text-gray-600 leading-snug">Berikan akses GPS saat diminta oleh browser.</p>
+        </div>
+      </div>
+      <div class="bg-yellow-300 border-4 border-black p-5 flex items-start gap-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <div class="w-12 h-12 shrink-0 bg-red-500 text-white border-2 border-black font-black text-2xl flex items-center justify-center">2</div>
+        <div class="flex-1">
+          <h3 class="font-black uppercase text-lg leading-tight mb-1">Tahan & Bicara</h3>
+          <p class="text-sm font-bold text-gray-800 leading-snug">Sebutkan patokan alamat & jumlah korban.</p>
+        </div>
+      </div>
+      <div class="bg-white border-4 border-black p-5 flex items-start gap-4 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+        <div class="w-12 h-12 shrink-0 bg-green-500 text-black border-2 border-black font-black text-2xl flex items-center justify-center">3</div>
+        <div class="flex-1">
+          <h3 class="font-black uppercase text-lg leading-tight mb-1">Bantuan Jalan</h3>
+          <p class="text-sm font-bold text-gray-600 leading-snug">AI mengirim prioritas ke BPBD seketika.</p>
+        </div>
+      </div>
     </section>
 
     <section class="flex flex-col md:flex-row gap-6 md:gap-8">
