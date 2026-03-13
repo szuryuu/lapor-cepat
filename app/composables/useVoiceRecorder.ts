@@ -1,70 +1,59 @@
+import { ref } from 'vue'
+
 export function useVoiceRecorder() {
   const isRecording = ref(false)
-  const audioBlob = ref<Blob | null>(null)
-  const audioUrl = ref<string | null>(null)
   const duration = ref(0)
-  const error = ref<string | null>(null)
+  const audioBlob = ref<Blob | null>(null)
+  const error = ref('')
 
   let mediaRecorder: MediaRecorder | null = null
-  let chunks: Blob[] = []
-  let timer: ReturnType<typeof setInterval> | null = null
+  let audioChunks: Blob[] = []
+  let timer: any = null
 
-  async function start() {
-    error.value = null
-    audioBlob.value = null
-    if (audioUrl.value) URL.revokeObjectURL(audioUrl.value)
-    audioUrl.value = null
-    duration.value = 0
-    chunks = []
-
+  const start = async () => {
     try {
+      error.value = ''
+      
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        throw new Error('Akses diblokir sistem. Wajib gunakan HTTPS.')
+      }
+
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      mediaRecorder = new MediaRecorder(stream)
+      
+      let mimeType = 'audio/webm'
+      if (!MediaRecorder.isTypeSupported(mimeType)) {
+        mimeType = 'audio/mp4'
+      }
+
+      mediaRecorder = new MediaRecorder(stream, { mimeType })
+      audioChunks = []
 
       mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) chunks.push(e.data)
+        if (e.data.size > 0) audioChunks.push(e.data)
       }
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(chunks, { type: 'audio/webm' })
-        audioBlob.value = blob
-        audioUrl.value = URL.createObjectURL(blob)
-        stream.getTracks().forEach(t => t.stop())
+        audioBlob.value = new Blob(audioChunks, { type: mimeType })
+        stream.getTracks().forEach(track => track.stop())
       }
 
-      mediaRecorder.start()
+      mediaRecorder.start(250)
       isRecording.value = true
+      duration.value = 0
+      timer = setInterval(() => { duration.value++ }, 1000)
 
-      timer = setInterval(() => {
-        duration.value++
-        if (duration.value >= 20) stop()
-      }, 1000)
-    } catch {
-      error.value = 'Izin mikrofon ditolak. Aktifkan mikrofon di pengaturan browser.'
+    } catch (err: any) {
+      error.value = err.message || 'Akses mikrofon diblokir.'
     }
   }
 
-  function stop() {
+  const stop = () => {
     if (mediaRecorder && isRecording.value) {
       mediaRecorder.stop()
       isRecording.value = false
-      if (timer) clearInterval(timer)
+      clearInterval(timer)
     }
   }
 
-  function reset() {
-    stop()
-    if (audioUrl.value) URL.revokeObjectURL(audioUrl.value)
-    audioBlob.value = null
-    audioUrl.value = null
-    duration.value = 0
-    error.value = null
-  }
-
-  onUnmounted(() => {
-    if (timer) clearInterval(timer)
-    if (audioUrl.value) URL.revokeObjectURL(audioUrl.value)
-  })
-
-  return { isRecording, audioBlob, audioUrl, duration, error, start, stop, reset }
+  return { start, stop, isRecording, duration, audioBlob, error }
 }

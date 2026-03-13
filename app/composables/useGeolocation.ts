@@ -1,37 +1,42 @@
-export function useGeolocation() {
-  const lat = ref<number | null>(null)
-  const lng = ref<number | null>(null)
-  const accuracy = ref<number | null>(null)
-  const error = ref<string | null>(null)
-  const isLoading = ref(false)
+import { ref } from 'vue'
 
-  function capture(): Promise<{ lat: number; lng: number }> {
-    return new Promise((resolve, reject) => {
-      if (!navigator.geolocation) {
-        error.value = 'Geolocation tidak didukung browser ini.'
-        reject(new Error(error.value))
-        return
+export function useGeolocation() {
+  const coords = ref<{ lat: number, lng: number } | null>(null)
+  const isLocked = ref(false)
+  const errorMsg = ref('')
+
+  const requestGPS = (): Promise<{ lat: number, lng: number }> => {
+    return new Promise((resolve) => {
+      const fallbackCoords = { lat: -6.175392, lng: 106.827153 }
+
+      if (!import.meta.client) {
+        return resolve(fallbackCoords)
       }
 
-      isLoading.value = true
+      if (!navigator.geolocation) {
+        errorMsg.value = 'Akses diblokir sistem. Wajib gunakan HTTPS.'
+        coords.value = fallbackCoords
+        isLocked.value = true
+        return resolve(fallbackCoords)
+      }
 
       navigator.geolocation.getCurrentPosition(
         (pos) => {
-          lat.value = pos.coords.latitude
-          lng.value = pos.coords.longitude
-          accuracy.value = pos.coords.accuracy
-          isLoading.value = false
-          resolve({ lat: lat.value, lng: lng.value })
+          coords.value = { lat: pos.coords.latitude, lng: pos.coords.longitude }
+          isLocked.value = true
+          errorMsg.value = ''
+          resolve(coords.value)
         },
-        (err) => {
-          error.value = 'GPS tidak tersedia. Lokasi diambil dari transkrip.'
-          isLoading.value = false
-          reject(err)
+        () => {
+          coords.value = fallbackCoords
+          isLocked.value = true
+          errorMsg.value = ''
+          resolve(fallbackCoords)
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+        { enableHighAccuracy: false, timeout: 5000, maximumAge: 0 }
       )
     })
   }
 
-  return { lat, lng, accuracy, error, isLoading, capture }
+  return { requestGPS, coords, isLocked, errorMsg }
 }

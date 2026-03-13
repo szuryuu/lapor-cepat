@@ -22,6 +22,7 @@ export default defineNuxtConfig({
     geminiApiKey: process.env.GEMINI_API_KEY || "",
     firebaseServiceAccount: process.env.FIREBASE_SERVICE_ACCOUNT || "",
     public: {
+      bpbdPin: process.env.NUXT_PUBLIC_BPBD_PIN || "",
       firebaseApiKey: process.env.NUXT_PUBLIC_FIREBASE_API_KEY || "",
       firebaseAuthDomain: process.env.NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN || "",
       firebaseProjectId: process.env.NUXT_PUBLIC_FIREBASE_PROJECT_ID || "",
