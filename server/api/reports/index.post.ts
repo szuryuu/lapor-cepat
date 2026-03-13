@@ -30,21 +30,31 @@ export default defineEventHandler(async (event) => {
     const transcript = transcription.text
     if (!transcript) throw createError({ statusCode: 400, message: 'Gagal mendeteksi suara' })
 
-    const genAI = new GoogleGenerativeAI(config.geminiApiKey as string)
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
+    let extracted = {
+      disaster_type: 'LAINNYA',
+      location_text: 'TIDAK TERIDENTIFIKASI',
+      victim_count_estimated: null,
+      victim_status: 'TIDAK_DIKETAHUI',
+      infrastructure_damage: false,
+      reporter_is_victim: false,
+      urgency_score: 5,
+      summary_bahasa: `[RAW TRANSCRIPT]: ${transcript}`
+    }
 
-    const prompt = `Ekstrak laporan darurat warga berikut menjadi JSON murni tanpa markdown.
-    
-Transkrip: "${transcript}"
+    try {
+      const genAI = new GoogleGenerativeAI(config.geminiApiKey as string)
+      const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' })
 
-Format respons JSON (wajib patuhi tanpa teks tambahan apapun):
-{"location_text":"alamat atau landmark, atau null","disaster_type":"BANJIR|GEMPA|LONGSOR|KEBAKARAN|ANGIN|LAINNYA","victim_count_estimated":null,"victim_status":"TERJEBAK|LUKA|MENINGGAL|TIDAK_ADA_KORBAN|TIDAK_DIKETAHUI","infrastructure_damage":false,"reporter_is_victim":false,"urgency_score":3,"summary_bahasa":"ringkasan 1 kalimat"}`
+      const prompt = `Ekstrak laporan darurat warga berikut menjadi JSON murni tanpa markdown.\nTranskrip: "${transcript}"\nFormat respons JSON:\n{"location_text":"alamat atau landmark, atau null","disaster_type":"BANJIR|GEMPA|LONGSOR|KEBAKARAN|ANGIN|LAINNYA","victim_count_estimated":null,"victim_status":"TERJEBAK|LUKA|MENINGGAL|TIDAK_ADA_KORBAN|TIDAK_DIKETAHUI","infrastructure_damage":false,"reporter_is_victim":false,"urgency_score":3,"summary_bahasa":"ringkasan 1 kalimat"}`
 
-    const geminiResult = await model.generateContent(prompt)
-    let rawText = geminiResult.response.text()
-    
-    rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim()
-    const extracted = JSON.parse(rawText)
+      const geminiResult = await model.generateContent(prompt)
+      let rawText = geminiResult.response.text()
+      
+      rawText = rawText.replace(/```json/g, '').replace(/```/g, '').trim()
+      extracted = JSON.parse(rawText)
+    } catch {
+      console.warn('LLM_FAILOVER_TRIGGERED')
+    }
 
     const lat = latStr ? parseFloat(latStr) : null
     const lng = lngStr ? parseFloat(lngStr) : null
@@ -66,8 +76,8 @@ Format respons JSON (wajib patuhi tanpa teks tambahan apapun):
       victimStatus: extracted.victim_status || 'TIDAK_DIKETAHUI',
       infrastructureDamage: !!extracted.infrastructure_damage,
       reporterIsVictim: !!extracted.reporter_is_victim,
-      urgencyScore: extracted.urgency_score || 1,
-      summaryBahasa: extracted.summary_bahasa || transcript,
+      urgencyScore: extracted.urgency_score || 5,
+      summaryBahasa: extracted.summary_bahasa,
       priority,
       status: 'PENDING'
     }
@@ -76,7 +86,6 @@ Format respons JSON (wajib patuhi tanpa teks tambahan apapun):
 
     return { id: docRef.id, ...reportData }
   } catch (e: any) {
-    console.error('SERVER ERROR:', e)
     throw createError({ statusCode: e.statusCode || 500, message: e.message || 'Server Error' })
   }
 })

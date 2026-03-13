@@ -5,19 +5,31 @@ export function useGeolocation() {
   const isLocked = ref(false)
   const errorMsg = ref('')
 
-  const requestGPS = (): Promise<{ lat: number, lng: number }> => {
-    return new Promise((resolve) => {
-      const fallbackCoords = { lat: -6.175392, lng: 106.827153 }
+  const getFallback = async () => {
+    try {
+      const res = await fetch('https://ipwho.is/')
+      const data = await res.json()
+      if (data.success && data.latitude && data.longitude) {
+        return { lat: parseFloat(data.latitude), lng: parseFloat(data.longitude) }
+      }
+      return { lat: -7.782888, lng: 110.367069 }
+    } catch {
+      return { lat: -7.782888, lng: 110.367069 }
+    }
+  }
 
+  const requestGPS = (): Promise<{ lat: number, lng: number }> => {
+    return new Promise(async (resolve) => {
       if (!import.meta.client) {
-        return resolve(fallbackCoords)
+        return resolve({ lat: -7.782888, lng: 110.367069 })
       }
 
       if (!navigator.geolocation) {
-        errorMsg.value = 'Akses diblokir sistem. Wajib gunakan HTTPS.'
-        coords.value = fallbackCoords
+        const fallback = await getFallback()
+        coords.value = fallback
         isLocked.value = true
-        return resolve(fallbackCoords)
+        errorMsg.value = ''
+        return resolve(fallback)
       }
 
       navigator.geolocation.getCurrentPosition(
@@ -27,11 +39,12 @@ export function useGeolocation() {
           errorMsg.value = ''
           resolve(coords.value)
         },
-        () => {
-          coords.value = fallbackCoords
+        async () => {
+          const fallback = await getFallback()
+          coords.value = fallback
           isLocked.value = true
           errorMsg.value = ''
-          resolve(fallbackCoords)
+          resolve(fallback)
         },
         { enableHighAccuracy: false, timeout: 5000, maximumAge: 0 }
       )
