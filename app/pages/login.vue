@@ -50,13 +50,12 @@ useSeoMeta({ title: 'Otentikasi BPBD — LaporCepat' })
 const pin = ref('')
 const errorMsg = ref('')
 const config = useRuntimeConfig()
+const authCookie = useCookie('bpbd_auth', { maxAge: 86400 })
 
 function handleLogin() {
-  if (pin.value === config.public.bpbdPin) {
-    if (import.meta.client) {
-      localStorage.setItem('bpbd_auth', 'true')
-      navigateTo('/dashboard')
-    }
+  if (pin.value === String(config.public.bpbdPin).trim()) {
+    authCookie.value = 'true'
+    navigateTo('/dashboard')
   } else {
     errorMsg.value = 'PIN tidak valid. Akses ditolak.'
     pin.value = ''

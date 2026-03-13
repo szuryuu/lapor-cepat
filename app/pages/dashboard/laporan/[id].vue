@@ -33,9 +33,6 @@
             <span v-if="report.lat && report.lng" class="text-xs font-mono font-bold text-slate-400 mt-1">
               LAT: {{ report.lat }} | LNG: {{ report.lng }}
             </span>
-            <span v-else class="text-xs font-mono font-bold text-red-500 mt-1">
-              GAGAL MENGUNCI GPS
-            </span>
           </div>
           <div class="flex flex-col gap-1">
             <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Estimasi Korban</span>
@@ -54,10 +51,7 @@
       <div class="bg-slate-100 border-t-2 border-slate-900 p-6 flex flex-col gap-4">
         <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Tindakan Komando</span>
         <div class="flex flex-wrap gap-4">
-          <button @click="updateStatus('VERIFIED')" :disabled="report.status === 'VERIFIED' || isUpdating" class="flex-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 disabled:bg-slate-300 text-white border-2 border-slate-900 py-3 text-xs font-bold uppercase tracking-widest transition-colors">
-            Verifikasi Data
-          </button>
-          <button @click="updateStatus('DISPATCHED')" :disabled="report.status === 'DISPATCHED' || isUpdating" class="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:bg-slate-300 text-white border-2 border-slate-900 py-3 text-xs font-bold uppercase tracking-widest transition-colors">
+          <button @click="updateStatus('DISPATCHED')" :disabled="report.status === 'DISPATCHED' || report.status === 'RESOLVED' || isUpdating" class="flex-1 bg-red-600 hover:bg-red-700 disabled:opacity-50 disabled:bg-slate-300 text-white border-2 border-slate-900 py-3 text-xs font-bold uppercase tracking-widest transition-colors">
             Tugaskan TRC
           </button>
           <button @click="updateStatus('RESOLVED')" :disabled="report.status === 'RESOLVED' || isUpdating" class="flex-1 bg-green-600 hover:bg-green-700 disabled:opacity-50 disabled:bg-slate-300 text-white border-2 border-slate-900 py-3 text-xs font-bold uppercase tracking-widest transition-colors">
@@ -73,6 +67,7 @@
 import { ref } from 'vue'
 import { ArrowLeft, Loader2 } from 'lucide-vue-next'
 import type { Report } from '~/types/report'
+import SharedPriorityBadge from '~/components/shared/PriorityBadge.vue'
 
 definePageMeta({ layout: 'dashboard' })
 

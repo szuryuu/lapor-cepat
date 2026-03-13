@@ -1,31 +1,47 @@
 <template>
-  <div class="bg-white border-2 border-slate-900 flex flex-col">
+  <div class="bg-white border-2 border-slate-900 flex flex-col hover:border-red-600 transition-colors group">
     <div class="flex justify-between items-center p-3 border-b-2 border-slate-900" :class="headerColor">
       <SharedPriorityBadge :priority="report.priority" />
-      <span class="text-[10px] font-bold uppercase tracking-widest text-slate-900">{{ timeAgo }} | ID:{{ report.id.split('-')[0] }}</span>
+      <span class="text-[10px] font-black uppercase tracking-widest text-slate-900">{{ timeAgo }} | ID:{{ report.id.split('-')[0] }}</span>
     </div>
-    <div class="p-5 flex flex-col gap-3">
-      <h3 class="font-black text-slate-900 text-lg uppercase leading-tight flex items-start gap-2">
+    
+    <div class="p-5 flex flex-col gap-4">
+      <h3 class="font-black text-slate-900 text-lg uppercase leading-tight flex items-start gap-2 h-[44px] overflow-hidden line-clamp-2" :title="report.locationText">
         <MapPin class="w-5 h-5 text-slate-900 shrink-0 mt-0.5" />
         {{ report.locationText }}
       </h3>
-      <p class="text-sm font-bold text-slate-600 mt-2 bg-slate-50 p-3 border-2 border-slate-200">
-        {{ report.summaryBahasa }}
-      </p>
-      <div class="flex items-center justify-between mt-2 pt-3 border-t-2 border-slate-100">
-        <div v-if="report.victimCountEstimated" class="flex items-center gap-1.5 text-red-700 font-bold text-xs uppercase tracking-widest">
-          <Users class="w-4 h-4" /> {{ report.victimCountEstimated }} KORBAN
+      
+      <div class="bg-slate-50 border-2 border-slate-200 p-3 h-[64px]">
+        <p class="text-xs font-bold text-slate-700 uppercase leading-relaxed line-clamp-2" :title="report.summaryBahasa">
+          "{{ report.summaryBahasa }}"
+        </p>
+      </div>
+
+      <div class="flex items-center justify-between pt-1">
+        <div v-if="report.victimCountEstimated" class="flex items-center gap-1.5 text-red-700 font-bold text-[10px] uppercase tracking-widest">
+          <Users class="w-4 h-4" /> {{ report.victimCountEstimated }} Korban
         </div>
-        <div v-else class="text-xs font-bold text-slate-400 uppercase tracking-widest">0 Korban</div>
-        <span class="text-xs font-black uppercase tracking-widest text-slate-900">{{ report.disasterType }}</span>
+        <div v-else class="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
+          <Users class="w-4 h-4" /> Nihil
+        </div>
+        <span class="text-[10px] font-black uppercase tracking-widest text-slate-900">{{ report.disasterType }}</span>
       </div>
     </div>
-    <div class="flex border-t-2 border-slate-900 bg-slate-50">
-      <button v-if="report.status === 'PENDING'" @click="emit('dispatch', report.id)" class="flex-1 bg-slate-900 hover:bg-black text-white py-3 text-xs font-bold uppercase tracking-widest transition-colors">
+
+    <div class="flex border-t-2 border-slate-900 bg-slate-50 mt-auto">
+      <button 
+        v-if="report.status === 'PENDING'" 
+        @click="emit('dispatch', report.id)" 
+        class="flex-1 bg-slate-900 hover:bg-black text-white py-4 text-[10px] font-bold uppercase tracking-widest transition-colors"
+      >
         Tugaskan Tim
       </button>
-      <button @click="emit('view', report.id)" class="px-6 py-3 text-slate-900 hover:bg-slate-200 text-xs font-bold uppercase tracking-widest transition-colors" :class="{ 'flex-1': report.status !== 'PENDING', 'border-l-2 border-slate-900': report.status === 'PENDING' }">
-        Detail
+      <button 
+        @click="emit('view', report.id)" 
+        class="py-4 text-slate-900 hover:bg-slate-200 text-[10px] font-bold uppercase tracking-widest transition-colors" 
+        :class="{ 'flex-1': report.status !== 'PENDING', 'px-6 border-l-2 border-slate-900': report.status === 'PENDING' }"
+      >
+        Lihat Detail
       </button>
     </div>
   </div>

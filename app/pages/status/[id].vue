@@ -1,71 +1,81 @@
 <template>
-  <div class="min-h-screen flex flex-col bg-slate-100 font-sans antialiased">
-    <header class="bg-white border-b-2 border-slate-900 px-4 py-4 flex items-center gap-4 sticky top-0 z-40">
-      <NuxtLink to="/" class="bg-slate-900 hover:bg-black text-white p-2 transition-colors">
-        <ArrowLeft class="w-5 h-5" />
+  <div class="min-h-[80vh] flex flex-col items-center justify-center p-4">
+    <div v-if="pending" class="flex flex-col items-center gap-4">
+      <Loader2 class="w-10 h-10 animate-spin text-slate-900" />
+      <p class="text-xs font-bold uppercase tracking-widest text-slate-500">Melacak Sinyal...</p>
+    </div>
+
+    <div v-else-if="error || !report" class="w-full max-w-md bg-white border-2 border-slate-900 flex flex-col items-center text-center p-8 gap-4 shadow-lg shadow-red-900/5">
+      <AlertTriangle class="w-12 h-12 text-red-600" />
+      <div class="flex flex-col">
+        <h1 class="text-2xl font-black uppercase text-slate-900 tracking-tight">Data Tidak Ditemukan</h1>
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">ID Laporan tidak valid atau telah dihapus.</p>
+      </div>
+      <NuxtLink to="/" class="w-full bg-slate-900 hover:bg-black text-white border-2 border-slate-900 py-4 text-xs font-bold uppercase tracking-widest text-center transition-colors mt-4">
+        Kembali ke Portal
       </NuxtLink>
-      <span class="font-black text-lg uppercase tracking-tight text-slate-900">Status Operasi</span>
-    </header>
+    </div>
 
-    <main class="flex-1 p-4 max-w-md mx-auto w-full flex flex-col gap-6 py-8">
-      <div v-if="report" class="bg-white border-2 border-slate-900 p-6 flex flex-col gap-8 relative overflow-hidden">
-        <div class="absolute top-0 right-0 bg-slate-900 text-white text-[10px] font-bold px-2 py-1 uppercase tracking-widest">
-          ID:{{ report.id.split('-')[0] }}
-        </div>
+    <div v-else class="w-full max-w-md bg-white border-2 border-slate-900 flex flex-col shadow-lg shadow-slate-200">
+      <div class="bg-slate-900 p-6 flex flex-col items-center text-center gap-2">
+        <Activity class="w-8 h-8 text-white mb-2" />
+        <h1 class="text-xl font-black uppercase text-white tracking-tight">Status Evakuasi</h1>
+        <span class="text-[10px] font-mono font-bold text-slate-400">ID: {{ report.id }}</span>
+      </div>
 
-        <div class="relative pl-10 flex flex-col gap-8 mt-4">
-          <div class="absolute left-3.5 top-2 bottom-2 w-0.5 bg-slate-200"></div>
+      <div class="p-8 flex flex-col gap-8">
+        <div class="flex flex-col gap-2 relative">
+          <div class="absolute left-3.5 top-2 bottom-2 w-0.5 bg-slate-200 z-0"></div>
           
-          <div v-for="item in timeline" :key="item.key" class="relative z-10 flex flex-col gap-1">
-            <div class="absolute -left-10 w-7 h-7 bg-white border-2 flex items-center justify-center" :class="isReached(item.key) ? item.borderColor : 'border-slate-300'">
-              <component :is="item.icon" class="w-4 h-4" :class="isReached(item.key) ? item.iconColor : 'text-slate-300'" />
+          <div class="flex items-start gap-4 z-10 relative">
+            <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center border-2 border-slate-900" :class="report.status === 'PENDING' ? 'bg-red-500 animate-pulse' : 'bg-green-500'">
+              <div class="w-2 h-2 bg-slate-900 rounded-full"></div>
             </div>
-            <span class="text-sm font-black uppercase tracking-tight" :class="isReached(item.key) ? 'text-slate-900' : 'text-slate-400'">{{ item.title }}</span>
-            <span class="text-xs font-bold text-slate-500 uppercase tracking-widest" :class="isReached(item.key) ? 'text-slate-600' : 'text-slate-400'">{{ item.desc }}</span>
+            <div class="flex flex-col pt-1">
+              <span class="text-sm font-black uppercase tracking-widest text-slate-900">1. Laporan Diterima</span>
+              <span class="text-xs font-bold text-slate-500 mt-1">Sistem pusat telah mengamankan data Anda.</span>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4 z-10 relative mt-4">
+            <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center border-2 border-slate-900" :class="report.status === 'DISPATCHED' ? 'bg-blue-500 animate-pulse' : (report.status === 'RESOLVED' ? 'bg-green-500' : 'bg-slate-100')">
+              <div class="w-2 h-2 bg-slate-900 rounded-full"></div>
+            </div>
+            <div class="flex flex-col pt-1">
+              <span class="text-sm font-black uppercase tracking-widest" :class="report.status !== 'PENDING' ? 'text-slate-900' : 'text-slate-400'">2. TRC Dikerahkan</span>
+              <span class="text-xs font-bold mt-1" :class="report.status !== 'PENDING' ? 'text-slate-500' : 'text-slate-400'">Tim Reaksi Cepat sedang menuju lokasi kordinat.</span>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-4 z-10 relative mt-4">
+            <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center border-2 border-slate-900" :class="report.status === 'RESOLVED' ? 'bg-green-500' : 'bg-slate-100'">
+              <div class="w-2 h-2 bg-slate-900 rounded-full"></div>
+            </div>
+            <div class="flex flex-col pt-1">
+              <span class="text-sm font-black uppercase tracking-widest" :class="report.status === 'RESOLVED' ? 'text-slate-900' : 'text-slate-400'">3. Situasi Terkendali</span>
+              <span class="text-xs font-bold mt-1" :class="report.status === 'RESOLVED' ? 'text-slate-500' : 'text-slate-400'">Operasi evakuasi dan penanganan selesai.</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <div v-if="report" class="bg-white border-2 border-slate-900 p-5 flex flex-col gap-3">
-        <div class="flex justify-between items-center pb-3 border-b-2 border-slate-100">
-          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Klasifikasi Bencana</span>
-          <span class="text-xs font-black text-slate-900 uppercase tracking-widest">{{ report.disasterType }}</span>
-        </div>
-        <div class="flex justify-between items-start pt-1">
-          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest shrink-0 mt-0.5">Titik Lokasi</span>
-          <span class="text-sm font-black text-slate-900 uppercase text-right leading-tight max-w-[200px]">{{ report.locationText }}</span>
-        </div>
+      <div class="p-6 pt-0 flex flex-col gap-3">
+        <button @click="refresh" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 border-2 border-slate-900 py-4 text-xs font-bold uppercase tracking-widest text-center transition-colors flex items-center justify-center gap-2">
+          <RefreshCcw class="w-4 h-4" /> Segarkan Status
+        </button>
+        <NuxtLink to="/" class="w-full bg-slate-900 hover:bg-black text-white border-2 border-slate-900 py-4 text-xs font-bold uppercase tracking-widest text-center transition-colors">
+          Kembali ke Portal
+        </NuxtLink>
       </div>
-
-      <div class="flex items-center justify-center gap-2 mt-2 text-[10px] font-bold uppercase tracking-widest text-slate-500">
-        <RefreshCw class="w-3.5 h-3.5 animate-spin-slow" />
-        SINKRONISASI SATELIT (10S)
-      </div>
-    </main>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
-import { ArrowLeft, CheckCircle, Truck, Flag, RefreshCw } from 'lucide-vue-next'
+import { Loader2, AlertTriangle, Activity, RefreshCcw } from 'lucide-vue-next'
 import type { Report } from '~/types/report'
 
 const route = useRoute()
-const { data: report, refresh } = await useFetch<Report>(`/api/reports/${route.params.id}`)
-useSeoMeta({ title: 'Status Operasi — LaporCepat' })
-
-const timeline = [
-  { key: 'PENDING', icon: CheckCircle, borderColor: 'border-yellow-500', iconColor: 'text-yellow-600', title: 'Verifikasi Sistem', desc: 'Validasi AI Selesai' },
-  { key: 'VERIFIED', icon: CheckCircle, borderColor: 'border-blue-600', iconColor: 'text-blue-600', title: 'Diterima Komando', desc: 'Triage BPBD' },
-  { key: 'DISPATCHED', icon: Truck, borderColor: 'border-red-600', iconColor: 'text-red-600', title: 'TRC Berangkat', desc: 'Menuju Koordinat' },
-  { key: 'RESOLVED', icon: Flag, borderColor: 'border-green-600', iconColor: 'text-green-600', title: 'Terkendali', desc: 'Operasi Selesai' },
-]
-
-const statusOrder = ['PENDING', 'VERIFIED', 'DISPATCHED', 'RESOLVED']
-const isReached = (key: string) => report.value && statusOrder.indexOf(report.value.status) >= statusOrder.indexOf(key)
-
-onMounted(() => {
-  const interval = setInterval(refresh, 10000)
-  onUnmounted(() => clearInterval(interval))
-})
+const { data: report, pending, error, refresh } = await useFetch<Report>(`/api/reports/${route.params.id}`)
+useSeoMeta({ title: 'Pelacakan Evakuasi — LaporCepat' })
 </script>

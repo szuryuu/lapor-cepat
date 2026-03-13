@@ -7,17 +7,17 @@
       </div>
       <div class="bg-slate-900 text-white font-bold text-xs uppercase tracking-widest px-4 py-2 flex items-center gap-2">
         <span class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></span>
-        {{ reports?.length ?? 0 }} LAPORAN AKTIF
+        {{ activeReports.length }} LAPORAN AKTIF
       </div>
     </div>
 
     <div class="h-[60vh] min-h-[500px] border-2 border-slate-900 bg-slate-200 relative z-0 flex flex-col">
       <ClientOnly>
-        <DashboardMapView :reports="reports ?? []" class="flex-1" />
+        <MapView :reports="activeReports" class="flex-1" />
         <template #fallback>
           <div class="absolute inset-0 flex flex-col items-center justify-center bg-slate-50">
             <Loader2 class="w-10 h-10 animate-spin text-slate-900 mb-4" />
-            <p class="font-bold text-xs uppercase tracking-widest text-slate-500">MENGUNDUH DATA SATELIT...</p>
+            <p class="font-bold text-xs uppercase tracking-widest text-slate-500">Mengunduh Data Satelit...</p>
           </div>
         </template>
       </ClientOnly>
@@ -33,14 +33,20 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted } from 'vue'
 import { MapPin, Loader2 } from 'lucide-vue-next'
 import type { Report } from '~/types/report'
+import MapView from '~/components/dashboard/MapView.client.vue'
 
 definePageMeta({ layout: 'dashboard' })
 useSeoMeta({ title: 'Peta Spasial — BPBD' })
 
-const { data: reports, refresh } = await useFetch<Report[]>('/api/reports', { query: { status: 'PENDING' } })
+const { data: allReports, refresh } = await useFetch<Report[]>('/api/reports', { query: { status: 'ALL' } })
+
+const activeReports = computed(() => {
+  if (!allReports.value) return []
+  return allReports.value.filter(r => r.status === 'PENDING' || r.status === 'DISPATCHED')
+})
 
 const legendItems = [
   { colorClass: 'bg-red-600', label: 'Kritis' },
