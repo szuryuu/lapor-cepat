@@ -1,15 +1,19 @@
 import { getFirestoreDb } from '../../utils/firebase'
 
 export default defineEventHandler(async (event) => {
-  const id = getRouterParam(event, 'id')
-  const db = getFirestoreDb()
+  try {
+    const id = getRouterParam(event, 'id')
+    if (!id) throw createError({ statusCode: 400, message: 'ID Laporan tidak valid' })
 
-  const snapshot = await db.collection('reports')
-    .where('id', '==', id)
-    .limit(1)
-    .get()
+    const db = getFirestoreDb()
+    const doc = await db.collection('reports').doc(id).get()
 
-  if (snapshot.empty) throw createError({ statusCode: 404, message: 'Laporan tidak ditemukan' })
+    if (!doc.exists) {
+      throw createError({ statusCode: 404, message: 'Laporan tidak ditemukan di database' })
+    }
 
-  return snapshot.docs[0].data()
+    return { id: doc.id, ...doc.data() }
+  } catch (e: any) {
+    throw createError({ statusCode: e.statusCode || 500, message: e.message || 'Gagal menarik data' })
+  }
 })

@@ -1,18 +1,20 @@
 import { getFirestoreDb } from '../../utils/firebase'
 
 export default defineEventHandler(async (event) => {
-  const { status } = getQuery(event)
-  const db = getFirestoreDb()
+  try {
+    const query = getQuery(event)
+    const status = query.status as string
 
-  let query = db.collection('reports').orderBy('priorityScore', 'desc').limit(50) as FirebaseFirestore.Query
+    const db = getFirestoreDb()
+    let reportsRef: FirebaseFirestore.Query = db.collection('reports').orderBy('timestamp', 'desc')
 
-  if (status && status !== 'ALL') {
-    query = db.collection('reports')
-      .where('status', '==', status)
-      .orderBy('priorityScore', 'desc')
-      .limit(50)
+    if (status && status !== 'ALL') {
+      reportsRef = reportsRef.where('status', '==', status)
+    }
+
+    const snapshot = await reportsRef.get()
+    return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }))
+  } catch (e: any) {
+    throw createError({ statusCode: 500, message: 'Gagal memuat antrean' })
   }
-
-  const snapshot = await query.get()
-  return snapshot.docs.map(doc => doc.data())
 })

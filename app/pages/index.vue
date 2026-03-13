@@ -8,25 +8,25 @@
         Lapor Bencana<br/><span class="text-red-600">Darurat.</span>
       </h1>
       <p class="text-sm font-bold text-slate-600 max-w-lg leading-relaxed border-l-2 border-red-600 pl-3">
-        Portal resmi pelaporan warga. Sistem terintegrasi AI akan meneruskan pesan suara dan koordinat Anda langsung ke layar Tim Reaksi Cepat BPBD.
+        Portal resmi pelaporan warga. LLM AI secara kognitif memproses pesan suara Anda untuk mengekstrak titik koordinat, jumlah korban, dan tingkat ancaman ke layar Tim Reaksi Cepat secara *real-time*.
       </p>
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <div class="bg-slate-50 border-2 border-slate-900 p-5 flex flex-col gap-3">
         <span class="text-2xl font-black text-slate-300 leading-none">01</span>
-        <h2 class="font-bold text-sm uppercase tracking-widest text-slate-900">Akses Lokasi</h2>
-        <p class="text-xs font-bold text-slate-500">Sistem otomatis menarik titik koordinat GPS akurat.</p>
+        <h2 class="font-bold text-sm uppercase tracking-widest text-slate-900">Geospasial</h2>
+        <p class="text-xs font-bold text-slate-500">Sensor otomatis menarik titik koordinat GPS presisi tanpa perlu mengetik alamat.</p>
       </div>
       <div class="bg-slate-50 border-2 border-slate-900 p-5 flex flex-col gap-3">
         <span class="text-2xl font-black text-slate-300 leading-none">02</span>
-        <h2 class="font-bold text-sm uppercase tracking-widest text-slate-900">Rekam Suara</h2>
-        <p class="text-xs font-bold text-slate-500">Bicara langsung ke sistem tanpa perlu mengetik formulir.</p>
+        <h2 class="font-bold text-sm uppercase tracking-widest text-slate-900">Transkripsi Suara</h2>
+        <p class="text-xs font-bold text-slate-500">Tekan tombol dan bicara. Sistem mengubah kepanikan verbal menjadi teks terstruktur.</p>
       </div>
       <div class="bg-slate-50 border-2 border-slate-900 p-5 flex flex-col gap-3">
         <span class="text-2xl font-black text-slate-300 leading-none">03</span>
-        <h2 class="font-bold text-sm uppercase tracking-widest text-slate-900">Triage AI</h2>
-        <p class="text-xs font-bold text-slate-500">Laporan diurutkan otomatis berdasarkan tingkat krisis.</p>
+        <h2 class="font-bold text-sm uppercase tracking-widest text-slate-900">Triage AI (LLM)</h2>
+        <p class="text-xs font-bold text-slate-500">Mengekstrak jumlah korban, jenis insiden, dan mengkalkulasi prioritas operasi evakuasi.</p>
       </div>
     </div>
 

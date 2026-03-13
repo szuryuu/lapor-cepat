@@ -5,7 +5,18 @@
       <p class="text-xs font-bold uppercase tracking-widest text-slate-500">MENGAMANKAN DATA...</p>
     </div>
 
-    <div v-else-if="report" class="w-full max-w-md bg-white border-2 border-slate-900 flex flex-col">
+    <div v-else-if="error" class="w-full max-w-md bg-white border-2 border-slate-900 flex flex-col items-center text-center p-8 gap-4 shadow-lg shadow-red-900/5">
+      <AlertTriangle class="w-12 h-12 text-red-600" />
+      <div class="flex flex-col">
+        <h1 class="text-2xl font-black uppercase text-slate-900 tracking-tight">Koneksi Terputus</h1>
+        <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">{{ error.message || 'Gagal memuat detail laporan' }}</p>
+      </div>
+      <NuxtLink to="/" class="w-full bg-slate-900 hover:bg-black text-white border-2 border-slate-900 py-4 text-xs font-bold uppercase tracking-widest text-center transition-colors mt-4">
+        Kembali ke Portal
+      </NuxtLink>
+    </div>
+
+    <div v-else-if="report" class="w-full max-w-md bg-white border-2 border-slate-900 flex flex-col shadow-lg shadow-slate-200">
       <div class="bg-slate-50 border-b-2 border-slate-900 p-8 flex flex-col items-center text-center gap-4">
         <div class="bg-green-500 p-3 border-2 border-slate-900">
           <ShieldCheck class="w-8 h-8 text-slate-900" />
@@ -51,10 +62,10 @@
 </template>
 
 <script setup lang="ts">
-import { Loader2, ShieldCheck } from 'lucide-vue-next'
+import { Loader2, ShieldCheck, AlertTriangle } from 'lucide-vue-next'
 import type { Report } from '~/types/report'
 
 const route = useRoute()
-const { data: report, pending } = await useFetch<Report>(`/api/reports/${route.params.id}`)
+const { data: report, pending, error } = await useFetch<Report>(`/api/reports/${route.params.id}`)
 useSeoMeta({ title: 'Konfirmasi — LaporCepat' })
 </script>
