@@ -46,8 +46,7 @@ export default defineEventHandler(async (event) => {
   try {
     transcript = await transcribeAudio(audioPart.data, config.groqApiKey as string)
     groqSuccess = true
-  } catch (err) {
-  }
+  } catch {}
 
   let extracted: any = {
     disaster_type: 'LAINNYA', 
@@ -69,8 +68,7 @@ export default defineEventHandler(async (event) => {
     try {
       extracted = await analyzeEmergency(transcript, config.geminiApiKey as string)
       aiSuccess = true
-    } catch (err) {
-    }
+    } catch {}
   }
 
   if (aiSuccess && extracted.location_text === 'TIDAK_SPESIFIK') {
@@ -120,7 +118,7 @@ export default defineEventHandler(async (event) => {
     hoaxReason: extracted.hoax_reason || null,
     survivalInstructions: extracted.survival_instructions || [],
     priority,
-    status: 'PENDING'
+    status: 'DRAFT'
   }
 
   const db = getFirestoreDb()

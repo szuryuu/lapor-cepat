@@ -38,7 +38,7 @@
       </div>
     </div>
 
-    <div v-if="!filteredReports?.length" class="bg-white border-2 border-slate-900 p-16 text-center flex flex-col items-center shadow-lg shadow-slate-200">
+    <div v-if="!filteredReports?.length" class="bg-white border-2 border-slate-900 p-16 text-center flex flex-col items-center shadow-[8px_8px_0px_0px_rgba(15,23,42,1)]">
       <CheckCircle class="w-16 h-16 text-slate-300 mb-4" />
       <h3 class="text-2xl font-black text-slate-900 uppercase tracking-tight">Antrean Bersih</h3>
       <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mt-2">Tidak ada laporan pada sektor ini.</p>
@@ -74,12 +74,21 @@ const filterOptions: { label: string, value: FilterStatus }[] = [
   { label: 'Semua Data', value: 'ALL' }
 ]
 
-const { data: allReports, refresh } = await useFetch<Report[]>('/api/reports', {
-  query: { status: 'ALL' }
+const allReports = ref<Report[]>([])
+let eventSource: EventSource | null = null
+
+onMounted(() => {
+  eventSource = new EventSource('/api/reports/stream')
+  eventSource.onmessage = (event) => {
+    allReports.value = JSON.parse(event.data)
+  }
+})
+
+onUnmounted(() => {
+  if (eventSource) eventSource.close()
 })
 
 const filteredReports = computed(() => {
-  if (!allReports.value) return []
   if (filter.value === 'ALL') return allReports.value
   return allReports.value.filter(r => r.status === filter.value)
 })
@@ -97,16 +106,5 @@ const stats = computed(() => {
 
 async function dispatchReport(id: string) {
   await $fetch(`/api/reports/${id}`, { method: 'PATCH', body: { status: 'DISPATCHED' } })
-  await refresh()
 }
-
-let interval: ReturnType<typeof setInterval> | null = null
-
-onMounted(() => {
-  interval = setInterval(refresh, 5000)
-})
-
-onUnmounted(() => {
-  if (interval) clearInterval(interval)
-})
 </script>

@@ -5,7 +5,7 @@
       <p class="text-xs font-bold uppercase tracking-widest text-slate-500">Melacak Sinyal...</p>
     </div>
 
-    <div v-else-if="error || !report" class="w-full max-w-md bg-white border-2 border-slate-900 flex flex-col items-center text-center p-8 gap-4 shadow-lg shadow-red-900/5">
+    <div v-else-if="error || !report" class="w-full max-w-md bg-white border-2 border-slate-900 flex flex-col items-center text-center p-8 gap-4 shadow-[8px_8px_0px_0px_rgba(15,23,42,1)]">
       <AlertTriangle class="w-12 h-12 text-red-600" />
       <div class="flex flex-col">
         <h1 class="text-2xl font-black uppercase text-slate-900 tracking-tight">Data Tidak Ditemukan</h1>
@@ -16,7 +16,7 @@
       </NuxtLink>
     </div>
 
-    <div v-else class="w-full max-w-md bg-white border-2 border-slate-900 flex flex-col shadow-lg shadow-slate-200">
+    <div v-else class="w-full max-w-md bg-white border-2 border-slate-900 flex flex-col shadow-[8px_8px_0px_0px_rgba(15,23,42,1)]">
       <div class="bg-slate-900 p-6 flex flex-col items-center text-center gap-2">
         <Activity class="w-8 h-8 text-white mb-2" />
         <h1 class="text-xl font-black uppercase text-white tracking-tight">Status Evakuasi</h1>
@@ -25,19 +25,6 @@
           <CheckCircle v-if="copied" class="w-3 h-3 text-green-400" />
           <Copy v-else class="w-3 h-3 text-slate-400 group-hover:text-white" />
         </button>
-      </div>
-
-      <div v-if="report.survivalInstructions && report.survivalInstructions.length > 0 && report.status === 'PENDING'" class="bg-yellow-50 border-y-2 border-yellow-500 p-6 flex flex-col gap-3">
-        <h2 class="text-xs font-black uppercase tracking-widest text-yellow-800 flex items-center gap-2">
-          <AlertTriangle class="w-4 h-4" />
-          Instruksi Keselamatan Darurat
-        </h2>
-        <ul class="flex flex-col gap-2">
-          <li v-for="(instruction, idx) in report.survivalInstructions" :key="idx" class="flex gap-3 items-start">
-            <span class="bg-yellow-500 text-slate-900 text-[10px] font-black w-4 h-4 flex items-center justify-center shrink-0 mt-0.5">{{ idx + 1 }}</span>
-            <span class="text-sm font-bold text-yellow-900 leading-snug">{{ instruction }}</span>
-          </li>
-        </ul>
       </div>
 
       <div class="p-8 flex flex-col gap-8">
@@ -56,7 +43,7 @@
           </div>
 
           <div class="flex items-start gap-4 z-10 relative mt-4">
-            <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center border-2 border-slate-900" :class="report.status === 'DISPATCHED' ? 'bg-blue-500 animate-pulse' : (report.status === 'RESOLVED' ? 'bg-green-500' : 'bg-slate-100')">
+            <div class="w-8 h-8 shrink-0 rounded-full flex items-center justify-center border-2 border-slate-900" :class="report.status === 'DISPATCHED' ? 'bg-orange-500 animate-pulse' : (report.status === 'RESOLVED' ? 'bg-green-500' : 'bg-slate-100')">
               <Check v-if="report.status === 'RESOLVED'" class="w-4 h-4 text-slate-900 font-bold" />
               <div v-else-if="report.status === 'DISPATCHED'" class="w-2 h-2 bg-slate-900 rounded-full"></div>
             </div>
@@ -78,7 +65,18 @@
         </div>
       </div>
 
-      <div class="p-6 pt-0 flex flex-col gap-3">
+      <div v-if="report.status === 'PENDING'" class="bg-slate-50 border-t-2 border-slate-900 p-6 flex flex-col gap-4">
+        <div class="flex items-center gap-2 text-red-600">
+          <PhoneCall class="w-5 h-5 shrink-0" />
+          <span class="text-xs font-black uppercase tracking-widest">Belum ada respons? Hubungi:</span>
+        </div>
+        <div class="flex flex-col gap-2">
+          <a href="tel:119" class="bg-white text-slate-900 border-2 border-slate-900 p-3 text-center text-xs font-black uppercase tracking-widest hover:bg-slate-100 transition-colors">☎ 119 (BNPB / Darurat)</a>
+          <a href="tel:115" class="bg-white text-slate-900 border-2 border-slate-900 p-3 text-center text-xs font-black uppercase tracking-widest hover:bg-slate-100 transition-colors">☎ 115 (SAR Nasional)</a>
+        </div>
+      </div>
+
+      <div class="p-6 bg-white border-t-2 border-slate-900 flex flex-col gap-3">
         <button @click="refresh" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-900 border-2 border-slate-900 py-4 text-xs font-bold uppercase tracking-widest text-center transition-colors flex items-center justify-center gap-2">
           <RefreshCcw class="w-4 h-4" /> Segarkan Status
         </button>
@@ -92,7 +90,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Loader2, AlertTriangle, Activity, RefreshCcw, Copy, CheckCircle, Check } from 'lucide-vue-next'
+import { Loader2, AlertTriangle, Activity, RefreshCcw, Copy, CheckCircle, Check, PhoneCall } from 'lucide-vue-next'
 import type { Report } from '~/types/report'
 
 const route = useRoute()
@@ -105,9 +103,7 @@ function copyId() {
   if (report.value?.id) {
     navigator.clipboard.writeText(report.value.id)
     copied.value = true
-    setTimeout(() => {
-      copied.value = false
-    }, 2000)
+    setTimeout(() => { copied.value = false }, 2000)
   }
 }
 </script>

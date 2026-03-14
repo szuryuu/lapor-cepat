@@ -1,71 +1,89 @@
 <template>
-  <div class="min-h-[80vh] flex flex-col items-center justify-center p-4">
+  <div class="min-h-[80vh] flex flex-col items-center justify-center p-4 gap-6">
     <div v-if="pending" class="flex flex-col items-center gap-4">
       <Loader2 class="w-10 h-10 animate-spin text-slate-900" />
-      <p class="text-xs font-bold uppercase tracking-widest text-slate-500">MENGAMANKAN DATA...</p>
+      <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Menganalisis Suara...</span>
     </div>
-
-    <div v-else-if="error" class="w-full max-w-md bg-white border-2 border-slate-900 flex flex-col items-center text-center p-8 gap-4 shadow-lg shadow-red-900/5">
-      <AlertTriangle class="w-12 h-12 text-red-600" />
-      <div class="flex flex-col">
-        <h1 class="text-2xl font-black uppercase text-slate-900 tracking-tight">Koneksi Terputus</h1>
-        <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">{{ error.message || 'Gagal memuat detail laporan' }}</p>
+    
+    <div v-else-if="report" class="w-full max-w-md bg-white border-2 border-slate-900 flex flex-col shadow-[8px_8px_0px_0px_rgba(15,23,42,1)]">
+      <div class="bg-slate-900 text-white p-6 flex items-center gap-3">
+        <ShieldAlert class="w-6 h-6 text-red-500" />
+        <h1 class="text-lg font-black uppercase tracking-widest">Verifikasi Laporan</h1>
       </div>
-      <NuxtLink to="/" class="w-full bg-slate-900 hover:bg-black text-white border-2 border-slate-900 py-4 text-xs font-bold uppercase tracking-widest text-center transition-colors mt-4">
-        Kembali ke Portal
-      </NuxtLink>
-    </div>
-
-    <div v-else-if="report" class="w-full max-w-md bg-white border-2 border-slate-900 flex flex-col shadow-lg shadow-slate-200">
-      <div class="bg-slate-50 border-b-2 border-slate-900 p-8 flex flex-col items-center text-center gap-4">
-        <div class="bg-green-500 p-3 border-2 border-slate-900">
-          <ShieldCheck class="w-8 h-8 text-slate-900" />
-        </div>
-        <div class="flex flex-col">
-          <h1 class="text-2xl font-black uppercase text-slate-900 tracking-tight">Laporan Diterima</h1>
-          <p class="text-xs font-bold text-slate-500 uppercase tracking-widest mt-1">Sistem BPBD Aktif</p>
-        </div>
-      </div>
-
-      <div class="p-6 flex flex-col gap-4">
-        <div class="flex justify-between items-center pb-3 border-b-2 border-slate-100">
-          <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Prioritas</span>
-          <SharedPriorityBadge :priority="report.priority" />
+      
+      <div class="p-6 flex flex-col gap-6">
+        <div class="flex flex-col gap-1">
+          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Sistem Kognitif Pusat</span>
+          <p class="text-sm font-black text-slate-900 leading-snug">{{ report.summaryBahasa }}</p>
         </div>
         
-        <div class="flex flex-col gap-1 pb-3 border-b-2 border-slate-100">
-          <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500">Titik Koordinat Bencana</span>
-          <span class="text-base font-black text-slate-900 uppercase leading-snug">{{ report.locationText }}</span>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="bg-slate-50 border-2 border-slate-200 p-3 flex flex-col">
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Tipe Bencana</span>
+            <span class="text-sm font-black text-slate-900">{{ report.disasterType }}</span>
+          </div>
+          <div class="bg-slate-50 border-2 border-slate-200 p-3 flex flex-col">
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Lokasi</span>
+            <span class="text-sm font-black text-slate-900 line-clamp-2">{{ report.locationText }}</span>
+          </div>
         </div>
 
-        <div v-if="report.victimCountEstimated" class="flex justify-between items-center bg-red-50 border-2 border-red-600 p-3">
-          <span class="text-xs font-bold uppercase tracking-widest text-red-700">Korban Terdeteksi</span>
-          <span class="text-sm font-black text-red-700 uppercase">{{ report.victimCountEstimated }} Orang</span>
+        <div v-if="report.survivalInstructions?.length" class="bg-yellow-50 border-2 border-yellow-500 p-4 flex flex-col gap-3">
+          <h2 class="text-[10px] font-black uppercase tracking-widest text-yellow-800 flex items-center gap-2">
+            <AlertTriangle class="w-4 h-4" /> Instruksi Bertahan Hidup
+          </h2>
+          <ul class="flex flex-col gap-2">
+            <li v-for="(inst, i) in report.survivalInstructions" :key="i" class="flex items-start gap-2">
+              <span class="bg-yellow-500 text-slate-900 text-[10px] font-black w-4 h-4 flex items-center justify-center shrink-0 mt-0.5">{{ i + 1 }}</span>
+              <span class="text-xs font-bold text-yellow-900">{{ inst }}</span>
+            </li>
+          </ul>
         </div>
 
-        <div class="bg-slate-50 border-2 border-slate-200 p-4 relative mt-2">
-          <p class="text-sm font-bold text-slate-700 uppercase">"{{ report.summaryBahasa }}"</p>
-          <span class="absolute top-2 right-2 text-[10px] font-bold text-slate-400">ID:{{ report.id.split('-')[0] }}</span>
+        <div class="flex flex-col gap-3 mt-2">
+          <button @click="confirmReport" :disabled="isSubmitting" class="w-full bg-slate-900 hover:bg-black text-white p-4 text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
+            <Send v-if="!isSubmitting" class="w-4 h-4" />
+            <Loader2 v-else class="w-4 h-4 animate-spin" />
+            {{ isSubmitting ? 'MENGIRIM...' : 'DATA BENAR, KIRIM SEKARANG' }}
+          </button>
+          <button @click="cancelReport" :disabled="isSubmitting" class="w-full bg-white hover:bg-slate-50 text-slate-900 border-2 border-slate-900 p-4 text-xs font-bold uppercase tracking-widest transition-colors flex items-center justify-center gap-2 disabled:opacity-50">
+            <RotateCcw class="w-4 h-4" />
+            BATALKAN & REKAM ULANG
+          </button>
         </div>
-      </div>
-
-      <div class="p-6 pt-0 flex flex-col gap-3">
-        <NuxtLink :to="`/status/${report.id}`" class="w-full bg-slate-900 hover:bg-black text-white border-2 border-slate-900 py-4 text-xs font-bold uppercase tracking-widest text-center transition-colors">
-          Pantau Status Evakuasi
-        </NuxtLink>
-        <NuxtLink to="/" class="w-full bg-white hover:bg-slate-50 text-slate-900 border-2 border-slate-900 py-4 text-xs font-bold uppercase tracking-widest text-center transition-colors">
-          Kembali ke Portal
-        </NuxtLink>
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { Loader2, ShieldCheck, AlertTriangle } from 'lucide-vue-next'
+import { ref } from 'vue'
+import { Loader2, ShieldAlert, AlertTriangle, Send, RotateCcw } from 'lucide-vue-next'
 import type { Report } from '~/types/report'
 
 const route = useRoute()
-const { data: report, pending, error } = await useFetch<Report>(`/api/reports/${route.params.id}`)
-useSeoMeta({ title: 'Konfirmasi — LaporCepat' })
+const { data: report, pending } = await useFetch<Report>(`/api/reports/${route.params.id}`)
+const isSubmitting = ref(false)
+
+async function confirmReport() {
+  if (isSubmitting.value) return
+  isSubmitting.value = true
+  try {
+    await $fetch(`/api/reports/${route.params.id}/confirm`, { method: 'POST' })
+    navigateTo(`/status/${route.params.id}`)
+  } catch {
+    isSubmitting.value = false
+  }
+}
+
+async function cancelReport() {
+  if (isSubmitting.value) return
+  isSubmitting.value = true
+  try {
+    await $fetch(`/api/reports/${route.params.id}/cancel`, { method: 'DELETE' })
+    navigateTo('/lapor')
+  } catch {
+    isSubmitting.value = false
+  }
+}
 </script>

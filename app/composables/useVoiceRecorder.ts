@@ -11,7 +11,7 @@ export function useVoiceRecorder() {
   let chunks: Blob[] = []
   let timer: ReturnType<typeof setInterval> | null = null
 
-  const MAX_DURATION = 35 
+  const MAX_DURATION = 45 
 
   const start = async () => {
     try {
@@ -42,7 +42,7 @@ export function useVoiceRecorder() {
         }
       }, 1000)
 
-    } catch (err: any) {
+    } catch {
       error.value = 'Akses mikrofon ditolak atau tidak tersedia.'
       isRecording.value = false
     }
@@ -55,6 +55,13 @@ export function useVoiceRecorder() {
       if (timer) {
         clearInterval(timer)
         timer = null
+      }
+      
+      if (duration.value < 3) {
+        error.value = 'REKAMAN TERLALU PENDEK (MINIMAL 3 DETIK).'
+        audioBlob.value = null
+        if (audioUrl.value) URL.revokeObjectURL(audioUrl.value)
+        audioUrl.value = null
       }
     }
   }

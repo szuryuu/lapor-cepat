@@ -3,12 +3,21 @@ import admin from 'firebase-admin'
 export function getFirestoreDb() {
   if (!admin.apps.length) {
     const config = useRuntimeConfig()
+    let credentialObj
+
+    if (config.firebaseServiceAccount) {
+      try {
+        credentialObj = admin.credential.cert(JSON.parse(String(config.firebaseServiceAccount)))
+      } catch {
+        credentialObj = admin.credential.applicationDefault()
+      }
+    } else {
+      credentialObj = admin.credential.applicationDefault()
+    }
+
     admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: config.firebase.projectId,
-        clientEmail: config.firebase.clientEmail,
-        privateKey: config.firebase.privateKey,
-      }),
+      credential: credentialObj,
+      projectId: config.public.firebaseProjectId,
       storageBucket: config.public.firebaseStorageBucket
     })
   }
@@ -17,15 +26,7 @@ export function getFirestoreDb() {
 
 export function getFirebaseStorage() {
   if (!admin.apps.length) {
-    const config = useRuntimeConfig()
-    admin.initializeApp({
-      credential: admin.credential.cert({
-        projectId: config.firebase.projectId,
-        clientEmail: config.firebase.clientEmail,
-        privateKey: config.firebase.privateKey,
-      }),
-      storageBucket: config.public.firebaseStorageBucket
-    })
+    getFirestoreDb()
   }
   return admin.storage().bucket()
 }

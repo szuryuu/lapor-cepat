@@ -1,8 +1,3 @@
-export type DisasterType = 'BANJIR' | 'GEMPA' | 'LONGSOR' | 'KEBAKARAN' | 'ANGIN' | 'LAINNYA'
-export type VictimStatus = 'TERJEBAK' | 'LUKA' | 'MENINGGAL' | 'TIDAK_ADA_KORBAN' | 'TIDAK_DIKETAHUI'
-export type ReportStatus = 'PENDING' | 'VERIFIED' | 'DISPATCHED' | 'RESOLVED'
-export type PriorityLevel = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW'
-
 export interface Report {
   id: string
   timestamp: string
@@ -19,7 +14,7 @@ export interface Report {
   urgencyScore: number
   summaryBahasa: string
   priority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW'
-  status: 'PENDING' | 'DISPATCHED' | 'RESOLVED'
+  status: 'DRAFT' | 'PENDING' | 'DISPATCHED' | 'RESOLVED'
   isHoaxSuspected?: boolean
   hoaxReason?: string | null
   survivalInstructions?: string[]
