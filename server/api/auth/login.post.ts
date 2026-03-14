@@ -7,7 +7,6 @@ export default defineEventHandler(async (event) => {
   }
 
   setCookie(event, 'bpbd_auth', 'authenticated', {
-    httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
     maxAge: 86400,
     path: '/'
@@ -15,4 +14,3 @@ export default defineEventHandler(async (event) => {
 
   return { success: true }
 })
-

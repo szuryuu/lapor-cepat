@@ -36,11 +36,17 @@ import { ShieldAlert, Activity, MapPin, LogOut } from 'lucide-vue-next'
 const authCookie = useCookie('bpbd_auth')
 
 if (authCookie.value !== 'authenticated') {
-  navigateTo('/login')
+  if (import.meta.client) {
+    window.location.href = '/login'
+  } else {
+    navigateTo('/login')
+  }
 }
 
 function logout() {
   authCookie.value = null
-  navigateTo('/login')
+  if (import.meta.client) {
+    window.location.href = '/login'
+  }
 }
 </script>
