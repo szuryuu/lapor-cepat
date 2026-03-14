@@ -25,23 +25,37 @@
             </div>
             
             <div class="p-8 md:p-12 flex flex-col items-center justify-center gap-8 min-h-[250px]">
-              <p class="text-sm font-bold text-slate-700 leading-relaxed text-center max-w-sm">
-                <span v-if="audioBlob">Rekaman diamankan. Sistem akan otomatis melampirkan koordinat GPS Anda.</span>
-                <span v-else>Tekan dan tahan tombol di bawah. Sistem akan meminta izin GPS & Mic secara bersamaan. Bicara dengan jelas.</span>
-              </p>
+              
+              <div v-if="audioBlob" class="w-full max-w-sm flex flex-col gap-4">
+                <div class="bg-green-50 border-2 border-green-600 p-4 flex items-center gap-3">
+                  <CheckCircle class="w-6 h-6 text-green-600 shrink-0" />
+                  <div class="flex flex-col">
+                    <span class="text-xs font-black uppercase tracking-widest text-green-700">Audio Diamankan</span>
+                    <span class="text-[10px] font-bold text-green-600 uppercase mt-0.5">Durasi: {{ duration }} Detik</span>
+                  </div>
+                </div>
+                
+                <audio :src="audioUrl" controls class="w-full h-10 outline-none border-2 border-slate-900 bg-slate-50"></audio>
+                
+                <button @click="resetAudio" class="py-3 text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 transition-colors flex items-center justify-center gap-2 mt-2 border-2 border-transparent hover:border-slate-900">
+                  <RotateCcw class="w-4 h-4" /> Buang & Rekam Ulang
+                </button>
+              </div>
 
-              <button
-                @mousedown="handleStart"
-                @mouseup="stop"
-                @mouseleave="stop"
-                @touchstart.prevent="handleStart"
-                @touchend.prevent="stop"
-                class="w-full max-w-sm py-4 font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-3 transition-colors border-2 select-none touch-none"
-                :class="isRecording ? 'bg-red-700 text-white border-slate-900 scale-95' : 'bg-red-600 hover:bg-red-700 text-white border-slate-900'"
-              >
-                <Mic class="w-5 h-5" />
-                {{ isRecording ? 'LEPASKAN UNTUK SELESAI' : 'TAHAN & BICARA KE BPBD' }}
-              </button>
+              <template v-else>
+                <p class="text-sm font-bold text-slate-700 leading-relaxed text-center max-w-sm">
+                  Tekan tombol di bawah untuk mulai. Sistem akan meminta izin GPS & Mic. Bicara dengan jelas, lalu tekan lagi untuk selesai.
+                </p>
+
+                <button
+                  @click="toggleRecord"
+                  class="w-full max-w-sm py-4 font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-3 transition-colors border-2 select-none"
+                  :class="isRecording ? 'bg-red-700 text-white border-slate-900 animate-pulse' : 'bg-red-600 hover:bg-red-700 text-white border-slate-900'"
+                >
+                  <Mic class="w-5 h-5" />
+                  {{ isRecording ? 'TAP UNTUK BERHENTI' : 'TAP & MULAI BICARA' }}
+                </button>
+              </template>
             </div>
           </div>
           <div v-if="audioError || gpsError" class="bg-slate-900 text-white p-4 text-xs font-bold uppercase tracking-widest flex gap-3 border-2 border-red-600">
@@ -78,23 +92,31 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Info, Loader2, Send, Mic, AlertOctagon } from 'lucide-vue-next'
+import { Info, Loader2, Send, Mic, AlertOctagon, CheckCircle, RotateCcw } from 'lucide-vue-next'
 import PhotoUpload from '~/components/lapor/PhotoUpload.vue'
 import { useGeolocation } from '~/composables/useGeolocation'
 import { useVoiceRecorder } from '~/composables/useVoiceRecorder'
 
 const { requestGPS, coords, isLocked, errorMsg: gpsError } = useGeolocation()
-const { start, stop, isRecording, duration, audioBlob, error: audioError } = useVoiceRecorder()
+const { start, stop, reset, isRecording, duration, audioBlob, audioUrl, error: audioError } = useVoiceRecorder()
 
 const photoFile = ref<File | null>(null)
 const isSubmitting = ref(false)
 
-async function handleStart() {
-  if (!isLocked.value) {
-    requestGPS().catch(() => {}) // Tembak GPS API di saat user interaksi pertama kali
+function resetAudio() {
+  reset()
+}
+
+async function toggleRecord() {
+  if (isRecording.value) {
+    stop()
+  } else {
+    if (!isLocked.value) {
+      await requestGPS().catch(() => {})
+    }
+    await start()
+    if (import.meta.client && navigator.vibrate) navigator.vibrate(50)
   }
-  await start()
-  if (import.meta.client && navigator.vibrate) navigator.vibrate(50)
 }
 
 async function submitReport() {

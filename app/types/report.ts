@@ -6,26 +6,21 @@ export type PriorityLevel = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW'
 export interface Report {
   id: string
   timestamp: string
-  status: ReportStatus
-  priority: PriorityLevel
-  priorityScore: number
-  audioUrl?: string
-  photoUrl?: string
-  rawTranscript: string
+  lat: number | null
+  lng: number | null
+  audioUrl: string | null
+  photoUrl: string | null
+  disasterType: string
   locationText: string
-  lat?: number
-  lng?: number
-  disasterType: DisasterType
-  victimCountEstimated?: number
-  victimStatus: VictimStatus
+  victimCountEstimated: number | null
+  victimStatus: string
   infrastructureDamage: boolean
   reporterIsVictim: boolean
   urgencyScore: number
   summaryBahasa: string
-  clusterId?: string
-  isDuplicate: boolean
-  duplicateOf?: string
-  assignedTo?: string
-  dispatchedAt?: string
-  fcmToken?: string
+  priority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW'
+  status: 'PENDING' | 'DISPATCHED' | 'RESOLVED'
+  isHoaxSuspected?: boolean
+  hoaxReason?: string | null
+  survivalInstructions?: string[]
 }

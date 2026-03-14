@@ -13,6 +13,15 @@
     </div>
 
     <div v-else-if="report" class="bg-white border-2 border-slate-900 flex flex-col shadow-lg shadow-slate-200">
+      
+      <div v-if="report.isHoaxSuspected" class="bg-yellow-400 border-b-2 border-slate-900 p-4 flex gap-4">
+        <AlertTriangle class="w-8 h-8 text-slate-900 shrink-0" />
+        <div class="flex flex-col">
+          <span class="font-black text-sm uppercase tracking-widest text-slate-900">Peringatan Integritas Data (Potensi Hoax)</span>
+          <span class="font-bold text-xs text-slate-800 mt-1">Sistem AI Triage mendeteksi anomali: "{{ report.hoaxReason }}"</span>
+        </div>
+      </div>
+
       <div class="bg-slate-50 border-b-2 border-slate-900 p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div class="flex flex-col">
           <span class="text-[10px] font-bold uppercase tracking-widest text-slate-500">ID Laporan</span>
@@ -65,7 +74,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { ArrowLeft, Loader2 } from 'lucide-vue-next'
+import { ArrowLeft, Loader2, AlertTriangle } from 'lucide-vue-next'
 import type { Report } from '~/types/report'
 import SharedPriorityBadge from '~/components/shared/PriorityBadge.vue'
 

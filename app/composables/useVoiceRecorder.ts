@@ -4,6 +4,7 @@ export function useVoiceRecorder() {
   const isRecording = ref(false)
   const duration = ref(0)
   const audioBlob = ref<Blob | null>(null)
+  const audioUrl = ref('')
   const error = ref('')
 
   let mediaRecorder: MediaRecorder | null = null
@@ -12,7 +13,15 @@ export function useVoiceRecorder() {
 
   const start = async () => {
     try {
+      if (timer) {
+        clearInterval(timer)
+        timer = null
+      }
+      
       error.value = ''
+      audioBlob.value = null
+      if (audioUrl.value) URL.revokeObjectURL(audioUrl.value)
+      audioUrl.value = ''
       
       if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
         throw new Error('Akses diblokir sistem. Wajib gunakan HTTPS.')
@@ -33,11 +42,13 @@ export function useVoiceRecorder() {
       }
 
       mediaRecorder.onstop = () => {
-        audioBlob.value = new Blob(audioChunks, { type: mimeType })
+        const blob = new Blob(audioChunks, { type: mimeType })
+        audioBlob.value = blob
+        audioUrl.value = URL.createObjectURL(blob)
         stream.getTracks().forEach(track => track.stop())
       }
 
-      mediaRecorder.start(250)
+      mediaRecorder.start()
       isRecording.value = true
       duration.value = 0
       timer = setInterval(() => { duration.value++ }, 1000)
@@ -48,12 +59,25 @@ export function useVoiceRecorder() {
   }
 
   const stop = () => {
+    if (timer) {
+      clearInterval(timer)
+      timer = null
+    }
+    
     if (mediaRecorder && isRecording.value) {
       mediaRecorder.stop()
       isRecording.value = false
-      clearInterval(timer)
     }
   }
 
-  return { start, stop, isRecording, duration, audioBlob, error }
+  const reset = () => {
+    audioBlob.value = null
+    duration.value = 0
+    if (audioUrl.value) {
+      URL.revokeObjectURL(audioUrl.value)
+      audioUrl.value = ''
+    }
+  }
+
+  return { start, stop, reset, isRecording, duration, audioBlob, audioUrl, error }
 }
