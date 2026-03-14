@@ -76,11 +76,49 @@ const filterOptions: { label: string, value: FilterStatus }[] = [
 
 const allReports = ref<Report[]>([])
 let eventSource: EventSource | null = null
+const knownIds = new Set<string>()
+let isInitialized = false
+
+function playAlert() {
+  try {
+    const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
+    const playBeep = (time: number) => {
+      const osc = ctx.createOscillator()
+      const gain = ctx.createGain()
+      osc.connect(gain)
+      gain.connect(ctx.destination)
+      osc.type = 'square'
+      osc.frequency.setValueAtTime(800, time)
+      gain.gain.setValueAtTime(0.1, time)
+      gain.gain.exponentialRampToValueAtTime(0.01, time + 0.2)
+      osc.start(time)
+      osc.stop(time + 0.2)
+    }
+    playBeep(ctx.currentTime)
+    playBeep(ctx.currentTime + 0.3)
+  } catch (e) {}
+}
 
 onMounted(() => {
   eventSource = new EventSource('/api/reports/stream', { withCredentials: true })
   eventSource.onmessage = (event) => {
-    allReports.value = JSON.parse(event.data)
+    const data: Report[] = JSON.parse(event.data)
+    
+    if (isInitialized) {
+      let hasNewPending = false
+      data.forEach(r => {
+        if (!knownIds.has(r.id)) {
+          knownIds.add(r.id)
+          if (r.status === 'PENDING') hasNewPending = true
+        }
+      })
+      if (hasNewPending) playAlert()
+    } else {
+      data.forEach(r => knownIds.add(r.id))
+      isInitialized = true
+    }
+
+    allReports.value = data
   }
 })
 

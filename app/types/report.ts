@@ -18,4 +18,6 @@ export interface Report {
   isHoaxSuspected?: boolean
   hoaxReason?: string | null
   survivalInstructions?: string[]
+  reporterPhone?: string | null
+  isSilent?: boolean
 }

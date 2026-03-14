@@ -47,13 +47,24 @@
             <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Estimasi Korban</span>
             <span class="text-base font-black text-red-600 uppercase">{{ report.victimCountEstimated || 0 }} Orang ({{ report.victimStatus }})</span>
           </div>
+          <div v-if="report.reporterPhone" class="flex flex-col gap-1">
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Kontak Pelapor</span>
+            <div class="flex items-center gap-2">
+              <span class="text-base font-black text-slate-900">{{ report.reporterPhone }}</span>
+              <a :href="`tel:${report.reporterPhone}`" class="bg-slate-900 text-white p-1.5"><Phone class="w-4 h-4" /></a>
+            </div>
+          </div>
         </div>
 
         <div class="flex flex-col gap-6">
           <div class="flex flex-col gap-2">
             <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Transkrip Kognitif AI</span>
-            <div class="bg-slate-50 border-2 border-slate-200 p-4 h-full">
+            <div class="bg-slate-50 border-2 border-slate-200 p-4 h-full relative">
               <p class="text-sm font-bold text-slate-700 leading-relaxed uppercase">"{{ report.summaryBahasa }}"</p>
+            </div>
+            <div v-if="report.isSilent" class="bg-slate-800 text-white p-3 flex gap-3 text-[10px] font-bold uppercase tracking-widest border-l-4 border-slate-500 mt-1">
+              <Keyboard class="w-4 h-4 shrink-0" />
+              Laporan Teks (Mode Bisu)
             </div>
           </div>
           <div v-if="report.photoUrl" class="flex flex-col gap-2">
@@ -80,7 +91,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { ArrowLeft, Loader2, AlertTriangle } from 'lucide-vue-next'
+import { ArrowLeft, Loader2, AlertTriangle, Phone, Keyboard } from 'lucide-vue-next'
 import type { Report } from '~/types/report'
 import SharedPriorityBadge from '~/components/shared/PriorityBadge.vue'
 
