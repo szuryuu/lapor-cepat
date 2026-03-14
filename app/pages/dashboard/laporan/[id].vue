@@ -12,7 +12,7 @@
       <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Menarik Data Arsip...</span>
     </div>
 
-    <div v-else-if="report" class="bg-white border-2 border-slate-900 flex flex-col shadow-lg shadow-slate-200">
+    <div v-else-if="report" class="bg-white border-2 border-slate-900 flex flex-col shadow-[8px_8px_0px_0px_rgba(15,23,42,1)]">
       
       <div v-if="report.isHoaxSuspected" class="bg-yellow-400 border-b-2 border-slate-900 p-4 flex gap-4">
         <AlertTriangle class="w-8 h-8 text-slate-900 shrink-0" />
@@ -49,10 +49,16 @@
           </div>
         </div>
 
-        <div class="flex flex-col gap-2">
-          <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Transkrip Kognitif AI</span>
-          <div class="bg-slate-50 border-2 border-slate-200 p-4 h-full">
-            <p class="text-sm font-bold text-slate-700 leading-relaxed uppercase">"{{ report.summaryBahasa }}"</p>
+        <div class="flex flex-col gap-6">
+          <div class="flex flex-col gap-2">
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Transkrip Kognitif AI</span>
+            <div class="bg-slate-50 border-2 border-slate-200 p-4 h-full">
+              <p class="text-sm font-bold text-slate-700 leading-relaxed uppercase">"{{ report.summaryBahasa }}"</p>
+            </div>
+          </div>
+          <div v-if="report.photoUrl" class="flex flex-col gap-2">
+            <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Foto Kondisi Lapangan</span>
+            <img :src="report.photoUrl" alt="Kondisi Lapangan" class="w-full border-2 border-slate-900 object-cover max-h-64" />
           </div>
         </div>
       </div>

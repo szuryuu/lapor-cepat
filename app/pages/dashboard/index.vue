@@ -78,7 +78,7 @@ const allReports = ref<Report[]>([])
 let eventSource: EventSource | null = null
 
 onMounted(() => {
-  eventSource = new EventSource('/api/reports/stream')
+  eventSource = new EventSource('/api/reports/stream', { withCredentials: true })
   eventSource.onmessage = (event) => {
     allReports.value = JSON.parse(event.data)
   }
