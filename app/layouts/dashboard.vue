@@ -1,41 +1,42 @@
 <template>
-  <div class="min-h-screen bg-slate-200 text-slate-900 font-sans antialiased flex flex-col">
-    <header class="bg-slate-900 border-b-4 border-red-600 sticky top-0 z-40">
-      <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="bg-white p-1">
-            <ShieldAlert class="w-5 h-5 text-slate-900" />
-          </div>
-          <span class="font-black text-lg tracking-widest uppercase text-white">BPBD <span class="text-slate-400">TRC</span></span>
+  <div class="min-h-screen bg-slate-100 flex flex-col md:flex-row">
+    <aside class="w-full md:w-64 bg-slate-900 text-white flex flex-col border-r-4 border-slate-900 shrink-0 md:h-screen sticky top-0">
+      <div class="p-6 border-b-2 border-slate-800 flex items-center gap-3">
+        <ShieldAlert class="w-8 h-8 text-red-500" />
+        <div class="flex flex-col">
+          <span class="text-lg font-black uppercase tracking-widest leading-none">BPBD</span>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Pusat Komando</span>
         </div>
-        <nav class="flex items-center gap-2">
-          <NuxtLink to="/dashboard" exact-active-class="bg-slate-800 text-white border-slate-700" class="flex items-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white transition-colors border border-transparent">
-            <List class="w-4 h-4" /> <span class="hidden sm:inline">Antrean</span>
-          </NuxtLink>
-          <NuxtLink to="/dashboard/peta" exact-active-class="bg-slate-800 text-white border-slate-700" class="flex items-center gap-2 px-3 py-2 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white transition-colors border border-transparent">
-            <MapIcon class="w-4 h-4" /> <span class="hidden sm:inline">Peta</span>
-          </NuxtLink>
-          <button @click="logout" class="ml-2 sm:ml-4 text-[10px] font-bold uppercase tracking-widest text-red-500 hover:text-red-400 transition-colors">
-            Logout
-          </button>
-        </nav>
       </div>
-    </header>
-    <main class="max-w-7xl mx-auto w-full px-4 py-6 flex-1">
+      <nav class="flex-1 p-4 flex flex-col gap-2">
+        <NuxtLink to="/dashboard" class="flex items-center gap-3 p-4 text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition-colors" exact-active-class="bg-red-600 text-white hover:bg-red-600 border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <Activity class="w-4 h-4 shrink-0" />
+          <span>Antrean</span>
+        </NuxtLink>
+        <NuxtLink to="/dashboard/peta" class="flex items-center gap-3 p-4 text-xs font-bold uppercase tracking-widest hover:bg-slate-800 transition-colors" exact-active-class="bg-red-600 text-white hover:bg-red-600 border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)]">
+          <MapPin class="w-4 h-4 shrink-0" />
+          <span>Peta Radar</span>
+        </NuxtLink>
+      </nav>
+      <div class="p-4 border-t-2 border-slate-800">
+        <button @click="logout" class="w-full flex items-center justify-center gap-2 p-4 text-xs font-bold uppercase tracking-widest text-slate-400 hover:text-white hover:bg-slate-800 transition-colors">
+          <LogOut class="w-4 h-4" /> Keluar
+        </button>
+      </div>
+    </aside>
+    <main class="flex-1 p-4 md:p-8 h-full min-h-screen overflow-y-auto">
       <slot />
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ShieldAlert, List, Map as MapIcon } from 'lucide-vue-next'
+import { ShieldAlert, Activity, MapPin, LogOut } from 'lucide-vue-next'
 
 const authCookie = useCookie('bpbd_auth')
 
-if (authCookie.value !== 'true') {
-  if (import.meta.client) {
-    navigateTo('/login')
-  }
+if (authCookie.value !== 'authenticated') {
+  navigateTo('/login')
 }
 
 function logout() {

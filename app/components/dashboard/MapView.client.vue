@@ -1,102 +1,127 @@
+<template>
+  <div class="relative w-full h-full min-h-[500px]">
+    <div class="absolute top-4 right-4 z-[400] bg-white border-2 border-slate-900 p-4 flex flex-col gap-3 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)]">
+      <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1 border-b-2 border-slate-100 pb-2">Filter Prioritas</span>
+      
+      <label class="flex items-center gap-3 text-xs font-bold uppercase tracking-widest cursor-pointer group">
+        <input type="radio" v-model="filter" value="ALL" class="w-4 h-4 accent-slate-900" /> 
+        <span class="group-hover:text-slate-600 transition-colors">Semua Radar</span>
+      </label>
+      <label class="flex items-center gap-3 text-xs font-bold uppercase tracking-widest cursor-pointer group text-red-600">
+        <input type="radio" v-model="filter" value="CRITICAL" class="w-4 h-4 accent-red-600" /> 
+        <span class="group-hover:text-red-500 transition-colors">Kritis (Lvl 5)</span>
+      </label>
+      <label class="flex items-center gap-3 text-xs font-bold uppercase tracking-widest cursor-pointer group text-orange-600">
+        <input type="radio" v-model="filter" value="HIGH" class="w-4 h-4 accent-orange-600" /> 
+        <span class="group-hover:text-orange-500 transition-colors">Tinggi (Lvl 4)</span>
+      </label>
+      <label class="flex items-center gap-3 text-xs font-bold uppercase tracking-widest cursor-pointer group text-blue-600">
+        <input type="radio" v-model="filter" value="MEDIUM" class="w-4 h-4 accent-blue-600" /> 
+        <span class="group-hover:text-blue-500 transition-colors">Menengah (Lvl 3)</span>
+      </label>
+    </div>
+    
+    <div id="map" class="w-full h-full absolute inset-0 z-0"></div>
+  </div>
+</template>
+
 <script setup lang="ts">
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, watch, onMounted, computed } from 'vue'
 import type { Report } from '~/types/report'
-import { getPriorityMapColor } from '~/utils/priority'
-import L from 'leaflet'
-import 'leaflet/dist/leaflet.css'
 
 const props = defineProps<{ reports: Report[] }>()
+const filter = ref('ALL')
 
-const mapContainer = ref<HTMLDivElement>()
-let map: L.Map | null = null
-let markersLayer: L.FeatureGroup | null = null
-
-function buildIcon(priority: Report['priority'], count: number) {
-  const color = getPriorityMapColor(priority)
-  const badge = count > 1 
-    ? `<div style="position:absolute; top:-8px; right:-8px; background:#0f172a; color:#fff; font-size:10px; font-weight:900; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center; border:2px solid #fff; z-index:10;">${count}</div>` 
-    : ''
-    
-  return L.divIcon({
-    html: `<div style="position:relative; background:${color};width:20px;height:20px;border:2px solid #0f172a;border-radius:50%;box-shadow:0 2px 4px rgba(0,0,0,0.3);">${badge}</div>`,
-    className: '',
-    iconSize: [20, 20],
-    iconAnchor: [10, 10],
-  })
-}
-
-function renderMarkers() {
-  if (!map) return
-  if (markersLayer) map.removeLayer(markersLayer)
-  
-  const grouped = new Map<string, Report[]>()
-  
-  props.reports.forEach(r => {
-    const lat = r.lat || -7.782888
-    const lng = r.lng || 110.367069
-    
-    const key = `${lat},${lng}`
-    if (!grouped.has(key)) grouped.set(key, [])
-    grouped.get(key)!.push(r)
-  })
-
-  const markers: L.Marker[] = []
-  const priorityOrder = ['CRITICAL', 'HIGH', 'MEDIUM', 'LOW']
-
-  grouped.forEach((group, key) => {
-    const [lat, lng] = key.split(',').map(Number)
-    
-    let highestPriority: Report['priority'] = 'LOW'
-    for (const p of priorityOrder) {
-      if (group.some(r => r.priority === p)) {
-        highestPriority = p as Report['priority']
-        break
-      }
-    }
-
-    let popupHtml = `<div style="max-height: 280px; overflow-y: auto; display: flex; flex-direction: column; gap: 12px; padding-right: 4px; font-family: ui-sans-serif, system-ui, sans-serif;">`
-    
-    group.forEach(r => {
-      popupHtml += `
-        <div style="padding-bottom: 12px; border-bottom: 2px solid #e2e8f0;">
-          <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 6px;">
-            <span style="font-weight: 900; text-transform: uppercase; font-size: 12px; color: #0f172a; letter-spacing: 0.05em;">${r.disasterType}</span>
-            <span style="font-size: 10px; font-weight: bold; color: #64748b; font-family: monospace;">ID:${r.id.split('-')[0]}</span>
-          </div>
-          <div style="font-weight: 700; font-size: 13px; line-height: 1.3; margin-bottom: 8px; color: #334155;">${r.locationText}</div>
-          <div style="font-size: 11px; background: #f8fafc; padding: 8px; border: 1px solid #cbd5e1; color: #475569; font-weight: 600; text-transform: uppercase;">"${r.summaryBahasa}"</div>
-        </div>`
-    })
-    
-    popupHtml += `</div>`
-
-    const marker = L.marker([lat, lng], { icon: buildIcon(highestPriority, group.length) })
-      .bindPopup(popupHtml, { minWidth: 280, maxWidth: 320 })
-    
-    markers.push(marker)
-  })
-
-  markersLayer = L.featureGroup(markers).addTo(map)
-  
-  if (markers.length > 0) {
-    map.fitBounds(markersLayer.getBounds(), { padding: [50, 50], maxZoom: 15 })
-  }
-}
-
-onMounted(() => {
-  if (!mapContainer.value) return
-  map = L.map(mapContainer.value).setView([-7.782888, 110.367069], 13)
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '© OpenStreetMap',
-  }).addTo(map)
-  renderMarkers()
+useHead({
+  link: [
+    { rel: 'stylesheet', href: 'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css' }
+  ]
 })
 
-watch(() => props.reports, renderMarkers, { deep: true })
+const filteredReports = computed(() => {
+  if (filter.value === 'ALL') return props.reports
+  return props.reports.filter(r => r.priority === filter.value)
+})
 
-onUnmounted(() => map?.remove())
+let map: any = null
+let markers: any[] = []
+
+onMounted(async () => {
+  const L = (await import('leaflet')).default
+  
+  map = L.map('map', { zoomControl: false }).setView([-7.7956, 110.3695], 13)
+  
+  L.control.zoom({ position: 'bottomright' }).addTo(map)
+
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+    attribution: '© OpenStreetMap contributors © CARTO',
+    maxZoom: 19
+  }).addTo(map)
+
+  const updateMarkers = () => {
+    markers.forEach(m => map.removeLayer(m))
+    markers = []
+
+    filteredReports.value.forEach(report => {
+      if (report.lat && report.lng) {
+        let color = '#3b82f6' 
+        if (report.priority === 'CRITICAL') color = '#ef4444'
+        else if (report.priority === 'HIGH') color = '#f97316'
+
+        const opacity = report.status === 'RESOLVED' ? '0.4' : '1'
+        const border = report.status === 'PENDING' ? 'border-style: dashed;' : 'border-style: solid;'
+
+        const icon = L.divIcon({
+          className: 'custom-triage-marker',
+          html: `<div style="background-color: ${color}; opacity: ${opacity}; width: 20px; height: 20px; border-radius: 50%; border: 3px solid #0f172a; ${border} box-shadow: 3px 3px 0px #0f172a;"></div>`,
+          iconSize: [20, 20],
+          iconAnchor: [10, 10],
+          popupAnchor: [0, -10]
+        })
+
+        const marker = L.marker([report.lat, report.lng], { icon }).addTo(map)
+        
+        const popupContent = `
+          <div style="font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; padding: 4px; min-width: 200px;">
+            <div style="font-size: 10px; font-weight: 900; letter-spacing: 0.1em; color: ${color}; text-transform: uppercase; margin-bottom: 4px; border-bottom: 2px solid #0f172a; padding-bottom: 4px;">
+              ${report.priority} PRIORITY
+            </div>
+            <div style="font-size: 14px; font-weight: 900; color: #0f172a; text-transform: uppercase; margin-bottom: 4px;">
+              ${report.disasterType}
+            </div>
+            <div style="font-size: 10px; font-weight: bold; color: #64748b; margin-bottom: 8px; line-height: 1.4;">
+              ${report.locationText}
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center; border-top: 2px dashed #e2e8f0; padding-top: 8px;">
+              <span style="font-size: 10px; font-weight: 900; padding: 2px 6px; background: #0f172a; color: white;">${report.status}</span>
+              <a href="/dashboard/laporan/${report.id}" style="font-size: 10px; font-weight: bold; color: #0f172a; text-decoration: none;">DETAIL ↗</a>
+            </div>
+          </div>
+        `
+        
+        marker.bindPopup(popupContent, {
+          className: 'triage-popup',
+          closeButton: false
+        })
+        
+        markers.push(marker)
+      }
+    })
+  }
+
+  watch(filteredReports, updateMarkers, { deep: true, immediate: true })
+})
 </script>
 
-<template>
-  <div ref="mapContainer" class="w-full h-full z-0" />
-</template>
+<style>
+.triage-popup .leaflet-popup-content-wrapper {
+  background: white;
+  border: 2px solid #0f172a;
+  border-radius: 0;
+  box-shadow: 4px 4px 0px 0px rgba(15,23,42,1);
+  padding: 0;
+}
+.triage-popup .leaflet-popup-tip-container {
+  display: none;
+}
+</style>
