@@ -65,9 +65,6 @@ async function handleLogin() {
       body: { pin: pin.value }
     })
     
-    const authCookie = useCookie('bpbd_auth', { maxAge: 86400 })
-    authCookie.value = 'authenticated'
-    
     navigateTo('/dashboard')
   } catch (e: any) {
     errorMsg.value = 'PIN tidak valid. Akses ditolak.'

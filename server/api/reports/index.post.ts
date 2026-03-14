@@ -1,5 +1,6 @@
-import { getFirestoreDb } from '../../utils/firebase'
+import { getFirestoreDb, getFirebaseStorage } from '../../utils/firebase'
 import type { Report } from '~/types/report'
+import { randomUUID } from 'crypto'
 
 export default defineEventHandler(async (event) => {
   const ip = getRequestIP(event, { xForwardedFor: true }) || 'unknown'
@@ -22,7 +23,7 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 413, message: 'File audio terlalu besar' })
   }
   
-  if (audioPart.type && !ALLOWED_AUDIO.includes(audioPart.type)) {
+  if (!audioPart.type || !ALLOWED_AUDIO.includes(audioPart.type)) {
     throw createError({ statusCode: 400, message: 'Format audio tidak valid' })
   }
 
@@ -32,7 +33,7 @@ export default defineEventHandler(async (event) => {
     if (photoPart.data.length > MAX_PHOTO_SIZE) {
       throw createError({ statusCode: 413, message: 'File foto terlalu besar' })
     }
-    if (photoPart.type && !ALLOWED_PHOTO.includes(photoPart.type)) {
+    if (!photoPart.type || !ALLOWED_PHOTO.includes(photoPart.type)) {
       throw createError({ statusCode: 400, message: 'Format foto tidak valid' })
     }
   }
@@ -84,12 +85,29 @@ export default defineEventHandler(async (event) => {
   else if (extracted.urgency_score >= 6) priority = 'HIGH'
   else if (extracted.urgency_score >= 4) priority = 'MEDIUM'
 
+  const bucket = getFirebaseStorage()
+  const fileId = randomUUID()
+  
+  const audioExt = audioPart.type === 'audio/mp4' ? 'mp4' : audioPart.type === 'audio/ogg' ? 'ogg' : audioPart.type === 'audio/mpeg' || audioPart.type === 'audio/mp3' ? 'mp3' : 'webm'
+  const audioFile = bucket.file(`reports/${fileId}-audio.${audioExt}`)
+  await audioFile.save(audioPart.data, { contentType: audioPart.type })
+  await audioFile.makePublic()
+  
+  let finalPhotoUrl = null
+  if (photoPart?.data && photoPart.type) {
+    const photoExt = photoPart.type === 'image/png' ? 'png' : photoPart.type === 'image/webp' ? 'webp' : 'jpg'
+    const pFile = bucket.file(`reports/${fileId}-photo.${photoExt}`)
+    await pFile.save(photoPart.data, { contentType: photoPart.type })
+    await pFile.makePublic()
+    finalPhotoUrl = pFile.publicUrl()
+  }
+
   const reportData: Omit<Report, 'id'> = {
     timestamp: new Date().toISOString(),
     lat: latStr ? parseFloat(latStr) : null,
     lng: lngStr ? parseFloat(lngStr) : null,
-    audioUrl: 'upload_terpisah',
-    photoUrl: photoPart ? 'ada_foto' : null,
+    audioUrl: audioFile.publicUrl(),
+    photoUrl: finalPhotoUrl,
     disasterType: extracted.disaster_type || 'LAINNYA',
     locationText: extracted.location_text || 'Lokasi tidak spesifik',
     victimCountEstimated: extracted.victim_count_estimated,

@@ -23,5 +23,6 @@ export async function checkRateLimit(ip: string) {
     }
   } catch (e: any) {
     if (e.statusCode === 429) throw e
+    console.error('[RATE_LIMIT_BYPASS]', e.message)
   }
 }
