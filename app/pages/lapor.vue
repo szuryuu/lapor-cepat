@@ -1,6 +1,5 @@
 <template>
   <div class="w-full flex flex-col gap-6 relative">
-    
     <div v-if="submitError" class="fixed top-4 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-md z-50 bg-red-600 text-white p-4 text-xs font-bold uppercase tracking-widest flex items-start justify-between border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] animate-in slide-in-from-top-4 fade-in duration-300">
       <div class="flex items-start gap-3">
         <AlertOctagon class="w-5 h-5 shrink-0 mt-0.5" />
@@ -33,8 +32,11 @@
               </div>
             </div>
             
+            <div v-if="isFallback" class="bg-yellow-500 text-slate-900 p-3 text-[10px] font-bold uppercase tracking-widest text-center border-b-2 border-slate-900">
+              ⚠️ Sinyal GPS Lemah. Estimasi lokasi kurang akurat. Mohon sebutkan patokan tempat secara verbal.
+            </div>
+            
             <div class="p-8 md:p-12 flex flex-col items-center justify-center gap-8 min-h-[250px]">
-              
               <div v-if="audioBlob" class="w-full max-w-sm flex flex-col gap-4">
                 <div class="bg-green-50 border-2 border-green-600 p-4 flex items-center gap-3">
                   <CheckCircle class="w-6 h-6 text-green-600 shrink-0" />
@@ -106,7 +108,7 @@ import PhotoUpload from '~/components/lapor/PhotoUpload.vue'
 import { useGeolocation } from '~/composables/useGeolocation'
 import { useVoiceRecorder } from '~/composables/useVoiceRecorder'
 
-const { requestGPS, coords, isLocked, errorMsg: gpsError } = useGeolocation()
+const { requestGPS, coords, isLocked, errorMsg: gpsError, isFallback } = useGeolocation()
 const { start, stop, reset, isRecording, duration, audioBlob, audioUrl, error: audioError } = useVoiceRecorder()
 
 const photoFile = ref<File | null>(null)
@@ -144,7 +146,7 @@ async function submitReport() {
     const response: any = await $fetch('/api/reports', { method: 'POST', body: formData })
     navigateTo(`/konfirmasi/${response.id}`)
   } catch (e: any) {
-    submitError.value = e.data?.message || e.message || 'Gagal mengirim laporan. Periksa koneksi internet.'
+    submitError.value = e.data?.message || e.message || 'Gagal mengirim laporan'
     setTimeout(() => { submitError.value = null }, 7000)
   } finally {
     isSubmitting.value = false

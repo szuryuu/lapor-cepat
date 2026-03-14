@@ -4,23 +4,29 @@ export function useGeolocation() {
   const coords = ref<{ lat: number, lng: number } | null>(null)
   const isLocked = ref(false)
   const errorMsg = ref('')
+  const isFallback = ref(false)
 
   const getFallback = async () => {
     try {
       const res = await fetch('https://ipwho.is/')
       const data = await res.json()
       if (data.success && data.latitude && data.longitude) {
+        isFallback.value = true
         return { lat: parseFloat(data.latitude), lng: parseFloat(data.longitude) }
       }
+      isFallback.value = true
       return { lat: -7.782888, lng: 110.367069 }
     } catch {
+      isFallback.value = true
       return { lat: -7.782888, lng: 110.367069 }
     }
   }
 
   const requestGPS = (): Promise<{ lat: number, lng: number }> => {
     return new Promise(async (resolve) => {
+      isFallback.value = false
       if (!import.meta.client) {
+        isFallback.value = true
         return resolve({ lat: -7.782888, lng: 110.367069 })
       }
 
@@ -51,5 +57,5 @@ export function useGeolocation() {
     })
   }
 
-  return { requestGPS, coords, isLocked, errorMsg }
+  return { requestGPS, coords, isLocked, errorMsg, isFallback }
 }

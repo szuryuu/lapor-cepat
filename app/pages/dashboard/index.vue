@@ -100,8 +100,13 @@ async function dispatchReport(id: string) {
   await refresh()
 }
 
+let interval: ReturnType<typeof setInterval> | null = null
+
 onMounted(() => {
-  const interval = setInterval(refresh, 5000)
-  onUnmounted(() => clearInterval(interval))
+  interval = setInterval(refresh, 5000)
+})
+
+onUnmounted(() => {
+  if (interval) clearInterval(interval)
 })
 </script>

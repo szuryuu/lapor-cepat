@@ -31,9 +31,11 @@
 
           <button 
             type="submit"
-            class="w-full bg-slate-900 hover:bg-black text-white py-4 font-bold text-sm uppercase tracking-widest transition-colors mt-2"
+            :disabled="isLoading"
+            class="w-full flex items-center justify-center gap-2 bg-slate-900 hover:bg-black text-white py-4 font-bold text-sm uppercase tracking-widest transition-colors mt-2 disabled:opacity-50"
           >
-            Verifikasi Akses
+            <Loader2 v-if="isLoading" class="w-5 h-5 animate-spin" />
+            <span v-else>Verifikasi Akses</span>
           </button>
         </form>
       </div>
@@ -43,22 +45,35 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { ShieldAlert } from 'lucide-vue-next'
+import { ShieldAlert, Loader2 } from 'lucide-vue-next'
 
 useSeoMeta({ title: 'Otentikasi BPBD — LaporCepat' })
 
 const pin = ref('')
 const errorMsg = ref('')
-const config = useRuntimeConfig()
-const authCookie = useCookie('bpbd_auth', { maxAge: 86400 })
+const isLoading = ref(false)
 
-function handleLogin() {
-  if (pin.value === String(config.public.bpbdPin).trim()) {
-    authCookie.value = 'true'
+async function handleLogin() {
+  if (!pin.value) return
+  
+  isLoading.value = true
+  errorMsg.value = ''
+
+  try {
+    await $fetch('/api/auth/login', {
+      method: 'POST',
+      body: { pin: pin.value }
+    })
+    
+    const authCookie = useCookie('bpbd_auth', { maxAge: 86400 })
+    authCookie.value = 'authenticated'
+    
     navigateTo('/dashboard')
-  } else {
+  } catch (e: any) {
     errorMsg.value = 'PIN tidak valid. Akses ditolak.'
     pin.value = ''
+  } finally {
+    isLoading.value = false
   }
 }
 </script>
