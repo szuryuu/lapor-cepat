@@ -1,5 +1,14 @@
 <template>
-  <div class="w-full flex flex-col gap-6">
+  <div class="w-full flex flex-col gap-6 relative">
+    
+    <div v-if="submitError" class="fixed top-4 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-md z-50 bg-red-600 text-white p-4 text-xs font-bold uppercase tracking-widest flex items-start justify-between border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] animate-in slide-in-from-top-4 fade-in duration-300">
+      <div class="flex items-start gap-3">
+        <AlertOctagon class="w-5 h-5 shrink-0 mt-0.5" />
+        <p class="leading-relaxed">{{ submitError }}</p>
+      </div>
+      <button @click="submitError = null" class="shrink-0 hover:text-slate-900 transition-colors"><X class="w-5 h-5" /></button>
+    </div>
+
     <div class="bg-white border-2 border-slate-900 p-5 flex flex-col gap-3">
       <h1 class="text-sm font-black uppercase tracking-widest text-slate-900 flex items-center gap-2">
         <Info class="w-4 h-4 text-red-600" />
@@ -92,7 +101,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Info, Loader2, Send, Mic, AlertOctagon, CheckCircle, RotateCcw } from 'lucide-vue-next'
+import { Info, Loader2, Send, Mic, AlertOctagon, CheckCircle, RotateCcw, X } from 'lucide-vue-next'
 import PhotoUpload from '~/components/lapor/PhotoUpload.vue'
 import { useGeolocation } from '~/composables/useGeolocation'
 import { useVoiceRecorder } from '~/composables/useVoiceRecorder'
@@ -102,6 +111,7 @@ const { start, stop, reset, isRecording, duration, audioBlob, audioUrl, error: a
 
 const photoFile = ref<File | null>(null)
 const isSubmitting = ref(false)
+const submitError = ref<string | null>(null)
 
 function resetAudio() {
   reset()
@@ -122,6 +132,7 @@ async function toggleRecord() {
 async function submitReport() {
   if (!audioBlob.value || isSubmitting.value) return
   isSubmitting.value = true
+  submitError.value = null
   try {
     const finalCoords = coords.value || { lat: 0, lng: 0 }
     const formData = new FormData()
@@ -133,7 +144,8 @@ async function submitReport() {
     const response: any = await $fetch('/api/reports', { method: 'POST', body: formData })
     navigateTo(`/konfirmasi/${response.id}`)
   } catch (e: any) {
-    alert(e.message || 'Gagal mengirim laporan. Periksa koneksi internet.')
+    submitError.value = e.data?.message || e.message || 'Gagal mengirim laporan. Periksa koneksi internet.'
+    setTimeout(() => { submitError.value = null }, 7000)
   } finally {
     isSubmitting.value = false
   }

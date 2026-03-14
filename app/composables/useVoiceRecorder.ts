@@ -4,79 +4,67 @@ export function useVoiceRecorder() {
   const isRecording = ref(false)
   const duration = ref(0)
   const audioBlob = ref<Blob | null>(null)
-  const audioUrl = ref('')
-  const error = ref('')
+  const audioUrl = ref<string | null>(null)
+  const error = ref<string | null>(null)
 
   let mediaRecorder: MediaRecorder | null = null
-  let audioChunks: Blob[] = []
-  let timer: any = null
+  let chunks: Blob[] = []
+  let timer: ReturnType<typeof setInterval> | null = null
+
+  const MAX_DURATION = 35 
 
   const start = async () => {
     try {
-      if (timer) {
-        clearInterval(timer)
-        timer = null
-      }
-      
-      error.value = ''
-      audioBlob.value = null
-      if (audioUrl.value) URL.revokeObjectURL(audioUrl.value)
-      audioUrl.value = ''
-      
-      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-        throw new Error('Akses diblokir sistem. Wajib gunakan HTTPS.')
-      }
-
+      error.value = null
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true })
-      
-      let mimeType = 'audio/webm'
-      if (!MediaRecorder.isTypeSupported(mimeType)) {
-        mimeType = 'audio/mp4'
-      }
-
-      mediaRecorder = new MediaRecorder(stream, { mimeType })
-      audioChunks = []
+      mediaRecorder = new MediaRecorder(stream)
 
       mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) audioChunks.push(e.data)
+        if (e.data.size > 0) chunks.push(e.data)
       }
 
       mediaRecorder.onstop = () => {
-        const blob = new Blob(audioChunks, { type: mimeType })
+        const blob = new Blob(chunks, { type: 'audio/webm' })
         audioBlob.value = blob
         audioUrl.value = URL.createObjectURL(blob)
+        chunks = []
         stream.getTracks().forEach(track => track.stop())
       }
 
       mediaRecorder.start()
       isRecording.value = true
       duration.value = 0
-      timer = setInterval(() => { duration.value++ }, 1000)
+
+      timer = setInterval(() => {
+        duration.value++
+        if (duration.value >= MAX_DURATION) {
+          stop()
+        }
+      }, 1000)
 
     } catch (err: any) {
-      error.value = err.message || 'Akses mikrofon diblokir.'
+      error.value = 'Akses mikrofon ditolak atau tidak tersedia.'
+      isRecording.value = false
     }
   }
 
   const stop = () => {
-    if (timer) {
-      clearInterval(timer)
-      timer = null
-    }
-    
     if (mediaRecorder && isRecording.value) {
       mediaRecorder.stop()
       isRecording.value = false
+      if (timer) {
+        clearInterval(timer)
+        timer = null
+      }
     }
   }
 
   const reset = () => {
     audioBlob.value = null
+    if (audioUrl.value) URL.revokeObjectURL(audioUrl.value)
+    audioUrl.value = null
     duration.value = 0
-    if (audioUrl.value) {
-      URL.revokeObjectURL(audioUrl.value)
-      audioUrl.value = ''
-    }
+    error.value = null
   }
 
   return { start, stop, reset, isRecording, duration, audioBlob, audioUrl, error }

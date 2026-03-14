@@ -16,28 +16,45 @@ export default defineEventHandler(async (event) => {
   if (!audioPart?.data) throw createError({ statusCode: 400, message: 'Audio wajib disertakan' })
 
   const config = useRuntimeConfig()
-  const transcript = await transcribeAudio(audioPart.data, config.groqApiKey as string)
-
-  let extracted: any = {
-    disaster_type: 'LAINNYA', location_text: 'TIDAK TERIDENTIFIKASI',
-    victim_count_estimated: null, victim_status: 'TIDAK_DIKETAHUI',
-    infrastructure_damage: false, reporter_is_victim: false, urgency_score: 5,
-    summary_bahasa: `[RAW TRANSCRIPT]: ${transcript}`,
-    is_hoax_suspected: false, hoax_reason: null, survival_instructions: []
-  }
+  
+  let transcript = ''
+  let groqSuccess = false
 
   try {
-    extracted = await analyzeEmergency(transcript, config.geminiApiKey as string)
+    transcript = await transcribeAudio(audioPart.data, config.groqApiKey as string)
+    groqSuccess = true
   } catch (err) {
-    console.warn('LLM_FAILOVER_TRIGGERED', err)
+    console.warn('GROQ_FAILOVER_TRIGGERED', err)
   }
 
-  const invalidLocations = ['TIDAK_SPESIFIK', 'TIDAK TERIDENTIFIKASI', 'TIDAK DIKETAHUI']
-  if (invalidLocations.includes(extracted.location_text?.toUpperCase())) {
-    throw createError({
-      statusCode: 400,
-      message: 'LOKASI TIDAK JELAS: Kami tidak dapat melacak patokan Anda. Mohon tarik napas, tenangkan diri, rekam ulang, dan sebutkan NAMA JALAN atau PATOKAN BANGUNAN yang spesifik agar TRC bisa menemukan Anda.'
-    })
+  let extracted: any = {
+    disaster_type: 'LAINNYA', 
+    location_text: groqSuccess ? 'FALLBACK_SYSTEM' : 'LOKASI VERBAL NIHIL (Lacak via Pin Peta)',
+    victim_count_estimated: null, 
+    victim_status: 'TIDAK_DIKETAHUI',
+    infrastructure_damage: false, 
+    reporter_is_victim: false, 
+    urgency_score: groqSuccess ? 5 : 8,
+    summary_bahasa: groqSuccess ? `[RAW TRANSCRIPT]: ${transcript}` : '[TRANSKRIPSI GAGAL: SERVER AUDIO DOWN. DENGARKAN REKAMAN MANUAL]',
+    is_hoax_suspected: false, 
+    hoax_reason: null, 
+    survival_instructions: []
+  }
+
+  let aiSuccess = false
+
+  if (groqSuccess) {
+    try {
+      extracted = await analyzeEmergency(transcript, config.geminiApiKey as string)
+      aiSuccess = true
+    } catch (err) {
+      console.warn('LLM_FAILOVER_TRIGGERED', err)
+    }
+  }
+
+  if (aiSuccess && extracted.location_text === 'TIDAK_SPESIFIK') {
+    extracted.location_text = 'LOKASI VERBAL NIHIL (Lacak via Pin Peta)'
+    extracted.urgency_score = Math.max(extracted.urgency_score, 6)
   }
 
   if (extracted.is_hoax_suspected) extracted.urgency_score = 1
