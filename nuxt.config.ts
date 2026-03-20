@@ -3,6 +3,11 @@ export default defineNuxtConfig({
   compatibilityDate: "2025-03-17",
   devtools: { enabled: true },
   modules: ["@nuxtjs/seo", "@nuxtjs/tailwindcss"],
+
+  nitro: {
+    preset: 'vercel'  
+  },
+
   app: {
     head: {
       htmlAttrs: { lang: 'id' },
