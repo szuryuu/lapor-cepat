@@ -1,6 +1,5 @@
-import { getFirestoreDb, getFirebaseStorage } from '../../utils/firebase'
+import { getFirestoreDb } from '../../utils/firebase'
 import type { Report } from '~/types/report'
-import { randomUUID } from 'crypto'
 
 export default defineEventHandler(async (event) => {
   const ip = getRequestIP(event, { xForwardedFor: true }) || 'unknown'
@@ -35,7 +34,7 @@ export default defineEventHandler(async (event) => {
   }
 
   const config = useRuntimeConfig()
-  
+
   let transcript = ''
   let groqSuccess = false
 
@@ -50,16 +49,16 @@ export default defineEventHandler(async (event) => {
   }
 
   let extracted: any = {
-    disaster_type: 'LAINNYA', 
+    disaster_type: 'LAINNYA',
     location_text: groqSuccess ? 'FALLBACK_SYSTEM' : 'LOKASI VERBAL NIHIL (Lacak via Pin Peta)',
-    victim_count_estimated: null, 
+    victim_count_estimated: null,
     victim_status: 'TIDAK_DIKETAHUI',
-    infrastructure_damage: false, 
-    reporter_is_victim: false, 
+    infrastructure_damage: false,
+    reporter_is_victim: false,
     urgency_score: groqSuccess ? 5 : 8,
     summary_bahasa: groqSuccess ? `[RAW TRANSCRIPT]: ${transcript}` : '[TRANSKRIPSI GAGAL: SERVER DOWN]',
-    is_hoax_suspected: false, 
-    hoax_reason: null, 
+    is_hoax_suspected: false,
+    hoax_reason: null,
     survival_instructions: []
   }
 
@@ -84,25 +83,14 @@ export default defineEventHandler(async (event) => {
   else if (extracted.urgency_score >= 6) priority = 'HIGH'
   else if (extracted.urgency_score >= 4) priority = 'MEDIUM'
 
-  const bucket = getFirebaseStorage()
-  const fileId = randomUUID()
-  
   let finalAudioUrl = null
   if (audioPart?.data && audioPart.type) {
-    const audioExt = audioPart.type === 'audio/mp4' ? 'mp4' : audioPart.type === 'audio/ogg' ? 'ogg' : audioPart.type === 'audio/mpeg' || audioPart.type === 'audio/mp3' ? 'mp3' : 'webm'
-    const audioFile = bucket.file(`reports/${fileId}-audio.${audioExt}`)
-    await audioFile.save(audioPart.data, { contentType: audioPart.type })
-    await audioFile.makePublic()
-    finalAudioUrl = audioFile.publicUrl()
+    finalAudioUrl = `data:${audioPart.type};base64,${audioPart.data.toString('base64')}`
   }
-  
+
   let finalPhotoUrl = null
   if (photoPart?.data && photoPart.type) {
-    const photoExt = photoPart.type === 'image/png' ? 'png' : photoPart.type === 'image/webp' ? 'webp' : 'jpg'
-    const pFile = bucket.file(`reports/${fileId}-photo.${photoExt}`)
-    await pFile.save(photoPart.data, { contentType: photoPart.type })
-    await pFile.makePublic()
-    finalPhotoUrl = pFile.publicUrl()
+    finalPhotoUrl = `data:${photoPart.type};base64,${photoPart.data.toString('base64')}`
   }
 
   const reportData: Omit<Report, 'id'> = {
