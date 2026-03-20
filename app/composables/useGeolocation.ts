@@ -6,19 +6,19 @@ export function useGeolocation() {
   const errorMsg = ref('')
   const isFallback = ref(false)
 
+  const DEFAULT_COORDS = { lat: -7.782888, lng: 110.367069 }
+
   const getFallback = async () => {
+    isFallback.value = true
     try {
-      const res = await fetch('https://ipwho.is/')
+      const res = await fetch('https://ip-api.com/json/?fields=status,lat,lon')
       const data = await res.json()
-      if (data.success && data.latitude && data.longitude) {
-        isFallback.value = true
-        return { lat: parseFloat(data.latitude), lng: parseFloat(data.longitude) }
+      if (data.status === 'success' && data.lat && data.lon) {
+        return { lat: parseFloat(data.lat), lng: parseFloat(data.lon) }
       }
-      isFallback.value = true
-      return { lat: -7.782888, lng: 110.367069 }
+      return DEFAULT_COORDS
     } catch {
-      isFallback.value = true
-      return { lat: -7.782888, lng: 110.367069 }
+      return DEFAULT_COORDS
     }
   }
 
@@ -27,7 +27,7 @@ export function useGeolocation() {
       isFallback.value = false
       if (!import.meta.client) {
         isFallback.value = true
-        return resolve({ lat: -7.782888, lng: 110.367069 })
+        return resolve(DEFAULT_COORDS)
       }
 
       if (!navigator.geolocation) {
