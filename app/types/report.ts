@@ -1,3 +1,5 @@
+export type PriorityLevel = 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW'
+
 export interface Report {
   id: string
   timestamp: string
@@ -13,7 +15,8 @@ export interface Report {
   reporterIsVictim: boolean
   urgencyScore: number
   summaryBahasa: string
-  priority: 'CRITICAL' | 'HIGH' | 'MEDIUM' | 'LOW'
+  situationNarrative?: string | null
+  priority: PriorityLevel
   status: 'DRAFT' | 'PENDING' | 'DISPATCHED' | 'RESOLVED'
   isHoaxSuspected?: boolean
   hoaxReason?: string | null

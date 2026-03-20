@@ -57,6 +57,7 @@ export default defineEventHandler(async (event) => {
     reporter_is_victim: false,
     urgency_score: groqSuccess ? 5 : 8,
     summary_bahasa: groqSuccess ? `[RAW TRANSCRIPT]: ${transcript}` : '[TRANSKRIPSI GAGAL: SERVER DOWN]',
+    situation_narrative: null,
     is_hoax_suspected: false,
     hoax_reason: null,
     survival_instructions: []
@@ -107,6 +108,7 @@ export default defineEventHandler(async (event) => {
     reporterIsVictim: !!extracted.reporter_is_victim,
     urgencyScore: extracted.urgency_score || 5,
     summaryBahasa: extracted.summary_bahasa,
+    situationNarrative: extracted.situation_narrative || null,
     isHoaxSuspected: !!extracted.is_hoax_suspected,
     hoaxReason: extracted.hoax_reason || null,
     survivalInstructions: extracted.survival_instructions || [],

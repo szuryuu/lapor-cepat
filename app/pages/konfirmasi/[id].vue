@@ -2,21 +2,29 @@
   <div class="min-h-[80vh] flex flex-col items-center justify-center p-4 gap-6">
     <div v-if="pending" class="flex flex-col items-center gap-4">
       <Loader2 class="w-10 h-10 animate-spin text-slate-900" />
-      <span class="text-xs font-bold uppercase tracking-widest text-slate-500">Menganalisis Suara...</span>
+      <span class="text-xs font-bold uppercase tracking-widest text-slate-500">AI sedang menganalisis laporan Anda...</span>
     </div>
-    
+
     <div v-else-if="report" class="w-full max-w-md bg-white border-2 border-slate-900 flex flex-col shadow-[8px_8px_0px_0px_rgba(15,23,42,1)]">
       <div class="bg-slate-900 text-white p-6 flex items-center gap-3">
         <ShieldAlert class="w-6 h-6 text-red-500" />
         <h1 class="text-lg font-black uppercase tracking-widest">Verifikasi Laporan</h1>
       </div>
-      
+
       <div class="p-6 flex flex-col gap-6">
+
+        <div v-if="report.situationNarrative" class="bg-slate-900 text-white p-4 flex flex-col gap-2 border-l-4 border-red-500">
+          <span class="text-[10px] font-black uppercase tracking-widest text-red-400 flex items-center gap-2">
+            <Brain class="w-3 h-3" /> Analisis Situasi AI
+          </span>
+          <p class="text-sm font-bold leading-relaxed text-slate-100">{{ report.situationNarrative }}</p>
+        </div>
+
         <div class="flex flex-col gap-1">
-          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Sistem Kognitif Pusat</span>
+          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Ringkasan Sistem</span>
           <p class="text-sm font-black text-slate-900 leading-snug">{{ report.summaryBahasa }}</p>
         </div>
-        
+
         <div class="grid grid-cols-2 gap-4">
           <div class="bg-slate-50 border-2 border-slate-200 p-3 flex flex-col">
             <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Tipe Bencana</span>
@@ -58,7 +66,7 @@
 
 <script setup lang="ts">
 import { ref } from 'vue'
-import { Loader2, ShieldAlert, AlertTriangle, Send, RotateCcw } from 'lucide-vue-next'
+import { Loader2, ShieldAlert, AlertTriangle, Send, RotateCcw, Brain } from 'lucide-vue-next'
 import type { Report } from '~/types/report'
 
 const route = useRoute()

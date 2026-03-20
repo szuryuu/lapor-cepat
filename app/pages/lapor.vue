@@ -1,11 +1,36 @@
 <template>
   <div class="w-full flex flex-col gap-6 relative">
-    <div v-if="submitError" class="fixed top-4 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-md z-50 bg-red-600 text-white p-4 text-xs font-bold uppercase tracking-widest flex items-start justify-between border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)] animate-in slide-in-from-top-4 fade-in duration-300">
+
+    <div v-if="submitError" class="fixed top-4 left-4 right-4 md:left-1/2 md:-translate-x-1/2 md:w-full md:max-w-md z-50 bg-red-600 text-white p-4 text-xs font-bold uppercase tracking-widest flex items-start justify-between border-2 border-slate-900 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)]">
       <div class="flex items-start gap-3">
         <AlertOctagon class="w-5 h-5 shrink-0 mt-0.5" />
         <p class="leading-relaxed">{{ submitError }}</p>
       </div>
       <button @click="submitError = null" class="shrink-0 hover:text-slate-900 transition-colors"><X class="w-5 h-5" /></button>
+    </div>
+
+    <div v-if="isSubmitting" class="fixed inset-0 bg-slate-900/90 z-50 flex flex-col items-center justify-center p-6">
+      <div class="w-full max-w-sm bg-white border-2 border-slate-900 flex flex-col shadow-[8px_8px_0px_0px_rgba(15,23,42,1)]">
+        <div class="bg-slate-900 p-4 flex items-center gap-3">
+          <Loader2 class="w-5 h-5 text-red-500 animate-spin shrink-0" />
+          <span class="text-sm font-black uppercase tracking-widest text-white">AI Sedang Bekerja</span>
+        </div>
+        <div class="p-5 flex flex-col gap-4">
+          <div v-for="(stage, i) in loadingStages" :key="i" class="flex items-center gap-3">
+            <div class="w-5 h-5 shrink-0 flex items-center justify-center">
+              <CheckCircle v-if="currentStage > i" class="w-5 h-5 text-green-600" />
+              <Loader2 v-else-if="currentStage === i" class="w-5 h-5 text-slate-900 animate-spin" />
+              <div v-else class="w-3 h-3 rounded-full bg-slate-200"></div>
+            </div>
+            <span class="text-xs font-bold uppercase tracking-widest" :class="currentStage === i ? 'text-slate-900' : currentStage > i ? 'text-green-600' : 'text-slate-400'">
+              {{ stage }}
+            </span>
+          </div>
+        </div>
+        <div class="bg-slate-50 border-t-2 border-slate-200 px-5 py-3">
+          <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Estimasi waktu: 15–30 detik</p>
+        </div>
+      </div>
     </div>
 
     <div class="bg-white border-2 border-slate-900 p-5 flex flex-col gap-3">
@@ -22,7 +47,7 @@
 
     <ClientOnly>
       <div class="flex flex-col gap-6">
-        
+
         <div class="bg-white border-2 border-slate-900 p-5 flex flex-col gap-2">
           <label class="text-[10px] font-black uppercase tracking-widest text-slate-900 flex items-center gap-2">
             <Phone class="w-3 h-3" /> Nomor HP Darurat (Opsional, Untuk Hubungan TRC)
@@ -54,14 +79,14 @@
                 </template>
               </div>
             </div>
-            
+
             <div v-if="isFallback" class="bg-yellow-500 text-slate-900 p-3 flex items-center justify-center gap-2 border-b-2 border-slate-900">
               <AlertTriangle class="w-4 h-4 shrink-0" />
               <span class="text-[10px] font-bold uppercase tracking-widest text-center leading-snug">Sinyal GPS Lemah. Estimasi lokasi kurang akurat. Mohon sebutkan patokan tempat secara spesifik.</span>
             </div>
-            
+
             <div class="p-6 md:p-12 flex flex-col items-center justify-center gap-8 min-h-[250px]">
-              
+
               <template v-if="isSilentMode">
                 <textarea v-model="textContent" rows="5" placeholder="Ketik situasi darurat Anda secara detail di sini..." class="w-full bg-slate-50 border-2 border-slate-300 focus:border-slate-900 outline-none p-4 text-sm font-bold resize-none transition-colors"></textarea>
               </template>
@@ -75,9 +100,7 @@
                       <span class="text-[10px] font-bold text-green-600 uppercase mt-0.5">Durasi: {{ duration }} Detik</span>
                     </div>
                   </div>
-                  
                   <audio :src="audioUrl" controls class="w-full h-10 outline-none border-2 border-slate-900 bg-slate-50"></audio>
-                  
                   <button @click="resetAudio" class="py-3 text-xs font-bold uppercase tracking-widest text-slate-500 hover:text-slate-900 transition-colors flex items-center justify-center gap-2 mt-2 border-2 border-transparent hover:border-slate-900">
                     <RotateCcw class="w-4 h-4" /> Buang & Rekam Ulang
                   </button>
@@ -87,7 +110,6 @@
                   <p class="text-sm font-bold text-slate-700 leading-relaxed text-center max-w-sm">
                     Tekan tombol di bawah untuk mulai. Sistem akan meminta izin GPS & Mic. Bicara dengan jelas, lalu tekan lagi untuk selesai.
                   </p>
-
                   <button
                     @click="toggleRecord"
                     class="w-full max-w-sm py-4 font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-3 transition-colors border-2 select-none"
@@ -101,6 +123,7 @@
 
             </div>
           </div>
+
           <div v-if="(!isSilentMode && audioError) || gpsError" class="bg-slate-900 text-white p-4 text-xs font-bold uppercase tracking-widest flex gap-3 border-2 border-red-600">
             <AlertOctagon class="w-4 h-4 shrink-0 text-red-500" />
             <p>{{ (!isSilentMode ? audioError : '') || gpsError }}</p>
@@ -108,20 +131,17 @@
         </div>
 
         <PhotoUpload v-model="photoFile" />
-        
-        <button 
+
+        <button
           @click="submitReport"
           :disabled="isSubmitting || (!isSilentMode && !audioBlob) || (isSilentMode && !textContent.trim())"
           class="w-full bg-slate-900 hover:bg-black text-white border-2 border-slate-900 py-4 px-6 font-bold text-sm uppercase tracking-widest flex items-center justify-center gap-3 transition-colors disabled:opacity-50"
         >
-          <template v-if="!isSubmitting">
-            <Send class="w-5 h-5" />
-            KIRIM KE PUSAT KOMANDO
-          </template>
-          <Loader2 v-else class="w-5 h-5 animate-spin" />
+          <Send class="w-5 h-5" />
+          KIRIM KE PUSAT KOMANDO
         </button>
       </div>
-      
+
       <template #fallback>
         <div class="bg-slate-50 border-2 border-slate-900 p-12 flex flex-col items-center justify-center gap-4">
           <Loader2 class="w-8 h-8 animate-spin text-slate-900" />
@@ -148,6 +168,15 @@ const phone = ref('')
 const photoFile = ref<File | null>(null)
 const isSubmitting = ref(false)
 const submitError = ref<string | null>(null)
+const currentStage = ref(0)
+
+const loadingStages = [
+  'Mengamankan koordinat GPS...',
+  'Mengunggah data laporan...',
+  'Whisper AI mentranskripsikan suara...',
+  'Gemini menganalisis situasi...',
+  'Menyusun laporan terstruktur...',
+]
 
 onMounted(() => {
   requestGPS().catch(() => {})
@@ -173,15 +202,24 @@ async function submitReport() {
   if (isSubmitting.value) return
   isSubmitting.value = true
   submitError.value = null
-  
+  currentStage.value = 0
+
+  const stageTimer = setInterval(() => {
+    if (currentStage.value < loadingStages.length - 1) {
+      currentStage.value++
+    }
+  }, 4000)
+
   try {
     if (!isLocked.value) {
       await requestGPS().catch(() => {})
     }
 
+    currentStage.value = 1
+
     const finalCoords = coords.value || { lat: 0, lng: 0 }
     const formData = new FormData()
-    
+
     formData.append('lat', finalCoords.lat.toString())
     formData.append('lng', finalCoords.lng.toString())
     if (phone.value) formData.append('phone', phone.value)
@@ -195,12 +233,14 @@ async function submitReport() {
     }
 
     const response: any = await $fetch('/api/reports', { method: 'POST', body: formData })
+    clearInterval(stageTimer)
+    currentStage.value = loadingStages.length
     navigateTo(`/konfirmasi/${response.id}`)
   } catch (e: any) {
+    clearInterval(stageTimer)
+    isSubmitting.value = false
     submitError.value = e.data?.message || e.message || 'Gagal mengirim laporan'
     setTimeout(() => { submitError.value = null }, 7000)
-  } finally {
-    isSubmitting.value = false
   }
 }
 </script>

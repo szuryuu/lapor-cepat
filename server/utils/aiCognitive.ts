@@ -32,7 +32,7 @@ export async function analyzeEmergency(transcript: string, apiKey: string) {
   const genAI = new GoogleGenerativeAI(apiKey)
   const model = genAI.getGenerativeModel({
     model: 'gemini-2.5-flash',
-    systemInstruction: "Anda adalah Sistem Pertahanan Kognitif & Pakar Survival BPBD. TUGAS: 1. Filter hoax/fiksi/anomali geografi. 2. Jika pelapor TIDAK menyebutkan nama jalan/patokan, WAJIB isi location_text: 'TIDAK_SPESIFIK'. 3. Berikan maksimal 3 instruksi taktis survival singkat untuk korban sambil menunggu bantuan."
+    systemInstruction: "Anda adalah Sistem Pertahanan Kognitif & Pakar Survival BPBD. TUGAS: 1. Filter hoax/fiksi/anomali geografi. 2. Jika pelapor TIDAK menyebutkan nama jalan/patokan, WAJIB isi location_text: 'TIDAK_SPESIFIK'. 3. Berikan maksimal 3 instruksi taktis survival singkat untuk korban sambil menunggu bantuan. 4. Tulis situation_narrative: narasi taktis singkat 2-3 kalimat dalam Bahasa Indonesia untuk briefing operator TRC — mencakup jenis insiden, lokasi, kondisi korban, dan rekomendasi tindakan tim."
   })
 
   const prompt = `
@@ -51,7 +51,8 @@ Hasilkan JSON:
 - reporter_is_victim: (boolean)
 - survival_instructions: (array of string maks 3)
 - urgency_score: (number 1-10)
-- summary_bahasa: (string)`
+- summary_bahasa: (string, ringkasan singkat 1 kalimat)
+- situation_narrative: (string, narasi taktis 2-3 kalimat untuk briefing operator TRC)`
 
   const geminiResult = await model.generateContent({
     contents: [{ role: 'user', parts: [{ text: prompt }] }],
@@ -59,10 +60,10 @@ Hasilkan JSON:
   })
 
   const result = JSON.parse(geminiResult.response.text())
-  
+
   if (typeof result.urgency_score !== 'number' || result.urgency_score > 10 || result.urgency_score < 1) {
     result.urgency_score = 5
   }
-  
+
   return result
 }
