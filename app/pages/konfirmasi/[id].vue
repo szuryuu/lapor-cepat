@@ -6,9 +6,25 @@
     </div>
 
     <div v-else-if="report" class="w-full max-w-md bg-white border-2 border-slate-900 flex flex-col shadow-[8px_8px_0px_0px_rgba(15,23,42,1)]">
-      <div class="bg-slate-900 text-white p-6 flex items-center gap-3">
-        <ShieldAlert class="w-6 h-6 text-red-500" />
-        <h1 class="text-lg font-black uppercase tracking-widest">Verifikasi Laporan</h1>
+      <div class="bg-slate-900 text-white p-6 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <ShieldAlert class="w-6 h-6 text-red-500" />
+          <h1 class="text-lg font-black uppercase tracking-widest">Verifikasi Laporan</h1>
+        </div>
+        <button
+          @click="isEditing = !isEditing"
+          class="flex items-center gap-2 px-3 py-1.5 border-2 text-[10px] font-black uppercase tracking-widest transition-colors"
+          :class="isEditing ? 'border-red-500 text-red-400 hover:bg-red-900' : 'border-slate-600 text-slate-400 hover:bg-slate-800'"
+        >
+          <Pencil v-if="!isEditing" class="w-3 h-3" />
+          <X v-else class="w-3 h-3" />
+          {{ isEditing ? 'Batal' : 'Koreksi' }}
+        </button>
+      </div>
+
+      <div v-if="isEditing" class="bg-yellow-50 border-b-2 border-yellow-400 px-5 py-3 flex items-start gap-2">
+        <AlertTriangle class="w-4 h-4 text-yellow-700 shrink-0 mt-0.5" />
+        <p class="text-[10px] font-bold text-yellow-800 uppercase tracking-widest leading-relaxed">Mode koreksi aktif. Perbaiki lokasi atau transkripsi yang salah, lalu kirim.</p>
       </div>
 
       <div class="p-6 flex flex-col gap-6">
@@ -20,9 +36,37 @@
           <p class="text-sm font-bold leading-relaxed text-slate-100">{{ report.situationNarrative }}</p>
         </div>
 
-        <div class="flex flex-col gap-1">
-          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Ringkasan Sistem</span>
-          <p class="text-sm font-black text-slate-900 leading-snug">{{ report.summaryBahasa }}</p>
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Lokasi Terdeteksi</span>
+            <span v-if="isEditing" class="text-[10px] font-black uppercase tracking-widest text-yellow-600">Dapat Diedit</span>
+          </div>
+          <div v-if="isEditing" class="flex flex-col gap-1">
+            <input
+              v-model="editedLocation"
+              type="text"
+              class="w-full bg-white border-2 border-yellow-400 focus:border-slate-900 px-3 py-2 text-sm font-bold outline-none transition-colors"
+              placeholder="Ketik ulang lokasi yang benar..."
+            />
+            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Contoh: Jl. Malioboro No. 12, dekat Tugu Jogja</span>
+          </div>
+          <p v-else class="text-sm font-black text-slate-900 leading-snug">{{ report.locationText }}</p>
+        </div>
+
+        <div class="flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Transkripsi / Ringkasan AI</span>
+            <span v-if="isEditing" class="text-[10px] font-black uppercase tracking-widest text-yellow-600">Dapat Diedit</span>
+          </div>
+          <div v-if="isEditing">
+            <textarea
+              v-model="editedSummary"
+              rows="3"
+              class="w-full bg-white border-2 border-yellow-400 focus:border-slate-900 px-3 py-2 text-sm font-bold outline-none resize-none transition-colors"
+              placeholder="Perbaiki transkripsi yang salah..."
+            />
+          </div>
+          <p v-else class="text-sm font-black text-slate-900 leading-snug">{{ report.summaryBahasa }}</p>
         </div>
 
         <div class="grid grid-cols-2 gap-4">
@@ -31,8 +75,8 @@
             <span class="text-sm font-black text-slate-900">{{ report.disasterType }}</span>
           </div>
           <div class="bg-slate-50 border-2 border-slate-200 p-3 flex flex-col">
-            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Lokasi</span>
-            <span class="text-sm font-black text-slate-900 line-clamp-2">{{ report.locationText }}</span>
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Prioritas AI</span>
+            <span class="text-sm font-black text-slate-900">{{ report.priority }}</span>
           </div>
         </div>
 
@@ -65,19 +109,41 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Loader2, ShieldAlert, AlertTriangle, Send, RotateCcw, Brain } from 'lucide-vue-next'
+import { ref, watch } from 'vue'
+import { Loader2, ShieldAlert, AlertTriangle, Send, RotateCcw, Brain, Pencil, X } from 'lucide-vue-next'
 import type { Report } from '~/types/report'
 
 const route = useRoute()
 const { data: report, pending } = await useFetch<Report>(`/api/reports/${route.params.id}`)
 const isSubmitting = ref(false)
+const isEditing = ref(false)
+
+const editedLocation = ref('')
+const editedSummary = ref('')
+
+watch(report, (val) => {
+  if (val) {
+    editedLocation.value = val.locationText || ''
+    editedSummary.value = val.summaryBahasa || ''
+  }
+}, { immediate: true })
 
 async function confirmReport() {
   if (isSubmitting.value) return
   isSubmitting.value = true
   try {
-    await $fetch(`/api/reports/${route.params.id}/confirm`, { method: 'POST' })
+    const body: Record<string, string> = {}
+
+    if (isEditing.value) {
+      if (editedLocation.value.trim() && editedLocation.value.trim() !== report.value?.locationText) {
+        body.locationText = editedLocation.value.trim()
+      }
+      if (editedSummary.value.trim() && editedSummary.value.trim() !== report.value?.summaryBahasa) {
+        body.summaryBahasa = editedSummary.value.trim()
+      }
+    }
+
+    await $fetch(`/api/reports/${route.params.id}/confirm`, { method: 'POST', body })
     navigateTo(`/status/${route.params.id}`)
   } catch {
     isSubmitting.value = false
