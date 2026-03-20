@@ -11,10 +11,10 @@ export function useGeolocation() {
   const getFallback = async () => {
     isFallback.value = true
     try {
-      const res = await fetch('https://ip-api.com/json/?fields=status,lat,lon')
+      const res = await fetch('https://freeipapi.com/api/json')
       const data = await res.json()
-      if (data.status === 'success' && data.lat && data.lon) {
-        return { lat: parseFloat(data.lat), lng: parseFloat(data.lon) }
+      if (data.latitude && data.longitude) {
+        return { lat: parseFloat(data.latitude), lng: parseFloat(data.longitude) }
       }
       return DEFAULT_COORDS
     } catch {
