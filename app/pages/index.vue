@@ -111,6 +111,37 @@
       </div>
     </div>
 
+    <ClientOnly>
+      <div v-if="reportHistory.length > 0" class="bg-white border-2 border-slate-900 flex flex-col">
+        <div class="flex items-center justify-between p-4 border-b-2 border-slate-900 bg-slate-50">
+          <span class="text-[10px] font-black uppercase tracking-widest text-slate-900 flex items-center gap-2">
+            <Clock class="w-3 h-3" /> Laporan Terakhir Anda
+          </span>
+          <button @click="clearHistory" class="text-[10px] font-bold uppercase tracking-widest text-slate-400 hover:text-red-600 transition-colors">
+            Hapus Semua
+          </button>
+        </div>
+        <div class="flex flex-col divide-y-2 divide-slate-100">
+          <NuxtLink
+            v-for="item in reportHistory"
+            :key="item.id"
+            :to="`/status/${item.id}`"
+            class="flex items-center justify-between p-4 hover:bg-slate-50 transition-colors group"
+          >
+            <div class="flex flex-col gap-0.5 flex-1 min-w-0">
+              <span class="text-xs font-black text-slate-900 uppercase tracking-widest">{{ item.disasterType }}</span>
+              <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest truncate">{{ item.locationText }}</span>
+              <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{{ timeAgo(item.timestamp) }}</span>
+            </div>
+            <div class="flex items-center gap-3 shrink-0 ml-3">
+              <span class="font-mono text-[10px] font-bold text-slate-400">{{ item.id.split('-')[0] }}</span>
+              <ArrowRight class="w-4 h-4 text-slate-400 group-hover:text-slate-900 transition-colors" />
+            </div>
+          </NuxtLink>
+        </div>
+      </div>
+    </ClientOnly>
+
     <form @submit.prevent="trackReport" class="flex flex-col md:flex-row gap-2 border-2 border-slate-900 bg-white p-4 items-end">
       <div class="flex flex-col flex-1 w-full gap-2">
         <label for="trackId" class="text-xs font-bold uppercase tracking-widest text-slate-900">Lacak Status Evakuasi</label>
@@ -132,8 +163,9 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { Mic, Activity, Search, MapPin, ShieldAlert } from 'lucide-vue-next'
+import { ref, onMounted } from 'vue'
+import { Mic, Activity, Search, MapPin, ShieldAlert, Clock, ArrowRight } from 'lucide-vue-next'
+import { useReportHistory } from '~/composables/useReportHistory'
 
 useSeoMeta({
   title: 'LaporCepat — Sistem Pelaporan Darurat Bencana Berbasis AI',
@@ -141,6 +173,28 @@ useSeoMeta({
 })
 
 const trackId = ref('')
+const { history: reportHistory, load } = useReportHistory()
+
+onMounted(() => {
+  load()
+})
+
+function clearHistory() {
+  if (!import.meta.client) return
+  localStorage.removeItem('laporcepat_history')
+  reportHistory.value = []
+}
+
+function timeAgo(timestamp: string) {
+  const diffMs = Date.now() - new Date(timestamp).getTime()
+  const mins = Math.floor(diffMs / 60000)
+  const hours = Math.floor(mins / 60)
+  const days = Math.floor(hours / 24)
+  if (mins < 1) return 'Baru saja'
+  if (mins < 60) return `${mins} menit lalu`
+  if (hours < 24) return `${hours} jam lalu`
+  return `${days} hari lalu`
+}
 
 function trackReport() {
   if (trackId.value.trim()) {

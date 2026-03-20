@@ -112,9 +112,11 @@
 import { ref, watch } from 'vue'
 import { Loader2, ShieldAlert, AlertTriangle, Send, RotateCcw, Brain, Pencil, X } from 'lucide-vue-next'
 import type { Report } from '~/types/report'
+import { useReportHistory } from '~/composables/useReportHistory'
 
 const route = useRoute()
 const { data: report, pending } = await useFetch<Report>(`/api/reports/${route.params.id}`)
+const { saveReport } = useReportHistory()
 const isSubmitting = ref(false)
 const isEditing = ref(false)
 
@@ -144,6 +146,16 @@ async function confirmReport() {
     }
 
     await $fetch(`/api/reports/${route.params.id}/confirm`, { method: 'POST', body })
+
+    if (report.value) {
+      saveReport({
+        id: report.value.id,
+        timestamp: report.value.timestamp,
+        disasterType: report.value.disasterType,
+        locationText: body.locationText || report.value.locationText,
+      })
+    }
+
     navigateTo(`/status/${route.params.id}`)
   } catch {
     isSubmitting.value = false
