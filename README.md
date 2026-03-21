@@ -1,106 +1,106 @@
-# 🚨 LaporCepat — Sistem Pelaporan Darurat Bencana Berbasis AI
+# LaporCepat — AI-Powered Disaster Reporting System
 
-> Portal warga × Pusat Komando BPBD, dihubungkan oleh kecerdasan buatan secara real-time.
+> Citizen Portal x BPBD Command Center, connected by artificial intelligence in real-time.
 
 **Live Demo:** [lapor-cepat.vercel.app](https://lapor-cepat.vercel.app)
 
 ---
 
-## Latar Belakang
+## Background
 
-Indonesia adalah negara kedua paling rawan bencana di dunia dengan skor kerentanan 43,5%. Namun sistem pelaporan darurat yang ada masih bergantung pada telepon manual ke call center — lambat, rawan miskomunikasi, dan tidak terstruktur.
+Indonesia ranks second among the most disaster-prone countries in the world with a vulnerability score of 43.5%. Yet the existing emergency reporting system still relies on manual phone calls to BPBD call centers: slow, prone to miscommunication, and unstructured.
 
-**LaporCepat** hadir untuk menjawab satu pertanyaan: *bagaimana warga yang panik bisa menyampaikan situasi darurat secara akurat ke tim respons, secepat mungkin?*
+**LaporCepat** was built to answer one question: *how can a panicked citizen accurately convey an emergency situation to the response team, as fast as possible?*
 
 ---
 
-## Solusi: AI Triage Pipeline
+## Solution: AI Triage Pipeline
 
-Warga tidak perlu mengisi formulir. Mereka cukup **berbicara** — dan AI mengerjakan sisanya.
+Citizens do not need to fill out forms. They simply **speak** and AI handles the rest.
 
 ```
-[Suara Warga] → [Whisper STT] → [Gemini LLM Triage] → [Dashboard BPBD]
-     ↓                                    ↓
-[Foto Lokasi]                    Ekstraksi otomatis:
-[GPS Koordinat]                  • Jenis bencana
-                                 • Estimasi korban
-                                 • Tingkat prioritas (CRITICAL/HIGH/MEDIUM/LOW)
-                                 • Instruksi survival untuk korban
-                                 • Deteksi hoax
+[Citizen Voice] -> [Whisper STT] -> [Gemini LLM Triage] -> [BPBD Dashboard]
+     |                                      |
+[Field Photo]                     Automatic extraction:
+[GPS Coordinates]                 - Disaster type
+                                  - Victim estimate
+                                  - Priority level (CRITICAL/HIGH/MEDIUM/LOW)
+                                  - Survival instructions for victims
+                                  - Hoax detection
 ```
 
 ---
 
-## Fitur Utama
+## Key Features
 
-**Portal Warga (`/lapor`)**
-- Perekaman suara langsung di browser, transkripsi via Whisper Large V3
-- Mode teks (bisu) untuk situasi yang tidak memungkinkan bicara
-- GPS otomatis dengan fallback ke IP geolocation
-- Upload foto kondisi lapangan
-- Halaman konfirmasi dengan preview hasil analisis AI sebelum dikirim
-- Halaman pelacakan status evakuasi via ID laporan
+**Citizen Portal (`/lapor`)**
+- Voice recording directly in the browser, transcribed via Whisper Large V3
+- Text mode (silent) for situations where speaking is not possible
+- Automatic GPS with fallback to IP geolocation
+- Field photo upload with automatic compression
+- Confirmation page with AI analysis preview before submitting
+- Evacuation status tracking via report ID
 
-**Dashboard BPBD (`/dashboard`)**
-- Antrean triage real-time via Server-Sent Events (Firestore `onSnapshot`)
-- Alert audio otomatis saat laporan kritis baru masuk
-- Filter status: Menunggu / Diproses / Selesai
-- Peta spasial interaktif (Leaflet) dengan filter prioritas
-- Detail laporan lengkap: transkripsi AI, foto, koordinat, kontak pelapor
-- Tindakan komando: tugaskan TRC, tandai selesai
+**BPBD Dashboard (`/dashboard`)**
+- Real-time triage queue via Server-Sent Events (Firestore `onSnapshot`)
+- Automatic audio alert when a new critical report arrives
+- Status filters: Pending / Dispatched / Resolved
+- Interactive spatial map (Leaflet) with priority filter
+- Full report detail: AI transcript, photo, coordinates, reporter contact
+- Command actions: dispatch TRC, mark as resolved
 
 ---
 
-## Arsitektur Teknis
+## Technical Architecture
 
-| Layer | Teknologi |
-|-------|-----------|
+| Layer | Technology |
+|-------|------------|
 | Frontend | Nuxt 4, Vue 3, Tailwind CSS |
-| AI — Speech-to-Text | Groq Whisper Large V3 |
-| AI — Triage & Analisis | Google Gemini 2.5 Flash |
+| AI Speech-to-Text | Groq Whisper Large V3 |
+| AI Triage and Analysis | Google Gemini 2.5 Flash |
 | Database | Firebase Firestore |
 | Realtime | Server-Sent Events + Firestore onSnapshot |
-| Geolokasi | Browser GPS API + IP Geolocation fallback |
-| Peta | Leaflet.js + OpenStreetMap (CartoDB) |
+| Geolocation | Browser GPS API + IP Geolocation fallback |
+| Map | Leaflet.js + OpenStreetMap (CartoDB) |
 | Deployment | Vercel (Serverless Node.js) |
 
 ---
 
-## Cara Kerja (Demo Flow)
+## How It Works (Demo Flow)
 
-1. Buka `/lapor` → izinkan akses GPS dan mikrofon
-2. Tekan **TAP & MULAI BICARA**, laporkan situasi darurat secara verbal
-3. AI memproses suara → ekstrak lokasi, jenis bencana, jumlah korban
-4. Review hasil analisis AI di halaman konfirmasi
-5. Kirim → laporan masuk ke dashboard BPBD secara real-time
-6. Operator BPBD melihat laporan di `/dashboard`, tugaskan TRC
-7. Warga memantau status di `/status/[id]`
+1. Open `/lapor` and allow GPS and microphone access
+2. Press **TAP AND START SPEAKING**, describe the emergency verbally
+3. AI processes the audio and extracts location, disaster type, and victim count
+4. Review the AI analysis on the confirmation page
+5. Submit and the report appears on the BPBD dashboard in real-time
+6. BPBD operator views the report at `/dashboard` and dispatches TRC
+7. Citizen tracks status at `/status/[id]`
 
 ---
 
-## Setup Lokal
+## Local Setup
 
 ```bash
-# Clone & install
+# Clone and install
 git clone https://github.com/szuryuu/lapor-cepat
 cd lapor-cepat
 npm install
 
 # Setup environment
 cp .env.example .env
-# Isi semua variabel di .env
+# Fill in all variables in .env
 
-# Jalankan dev server
+# Run dev server
 npm run dev
 ```
 
 ### Environment Variables
 
 ```env
-BPBD_PIN=              # PIN login dashboard operator
+BPBD_PIN=              # PIN for operator dashboard login
 GROQ_API_KEY=          # Groq API (Whisper STT)
 GEMINI_API_KEY=        # Google Gemini API
-FIREBASE_SERVICE_ACCOUNT= # JSON service account Firebase (stringify)
+FIREBASE_SERVICE_ACCOUNT= # Firebase service account JSON (stringified)
 
 NUXT_PUBLIC_FIREBASE_API_KEY=
 NUXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
@@ -111,12 +111,13 @@ NUXT_PUBLIC_FIREBASE_APP_ID=
 
 ---
 
-## Keamanan
+## Security
 
-- Rate limiting per IP via Firestore (3 request/menit)
-- Validasi tipe & ukuran file (audio maks 5MB, foto maks 10MB)
-- Autentikasi dashboard via PIN + cookie session
-- Input sanitization sebelum dikirim ke LLM (XML escaping)
-- Laporan masuk sebagai `DRAFT` → hanya aktif setelah dikonfirmasi warga
+- Rate limiting per IP via Firestore (3 requests per minute)
+- File type and size validation (audio max 5MB, photo max 600KB after compression)
+- Dashboard authentication via PIN + cookie session
+- Input sanitization (XML escaping) before sending to LLM
+- Reports enter as `DRAFT` status and only become active after citizen confirmation
+- AI fallback chain: Gemini 2.5 Flash falls back to Gemini 2.0 Flash on quota exhaustion
 
 ---
