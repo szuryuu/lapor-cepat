@@ -120,3 +120,4 @@ NUXT_PUBLIC_FIREBASE_APP_ID=
 - Reports enter as `DRAFT` status and only become active after citizen confirmation
 - AI fallback chain: Gemini 2.5 Flash falls back to Gemini 2.0 Flash on quota exhaustion
 
+---
