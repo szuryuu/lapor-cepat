@@ -6,7 +6,8 @@ export interface Report {
   lat: number | null
   lng: number | null
   audioUrl: string | null
-  photoUrl: string | null
+  photoUrl: string | null  
+  hasPhoto: boolean        
   disasterType: string
   locationText: string
   victimCountEstimated: number | null
