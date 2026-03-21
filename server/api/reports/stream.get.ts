@@ -10,15 +10,16 @@ export default defineEventHandler((event) => {
 
   const stream = new ReadableStream({
     start(controller) {
-      unsubscribe = db.collection('reports').onSnapshot((snapshot) => {
-        const reports = snapshot.docs
-          .map(doc => ({ id: doc.id, ...doc.data() }))
-          .filter((r: any) => r.status !== 'DRAFT')
-        
-        controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(reports)}\n\n`))
-      }, (err) => {
-        controller.error(err)
-      })
+      unsubscribe = db.collection('reports')
+        .orderBy('timestamp', 'desc')
+        .onSnapshot((snapshot) => {
+          const reports = snapshot.docs
+            .map(doc => ({ id: doc.id, ...doc.data() }))
+            .filter((r: any) => r.status !== 'DRAFT')
+          controller.enqueue(new TextEncoder().encode(`data: ${JSON.stringify(reports)}\n\n`))
+        }, (err) => {
+          controller.error(err)
+        })
     },
     cancel() {
       if (unsubscribe) unsubscribe()

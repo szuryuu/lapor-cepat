@@ -29,7 +29,7 @@ export default defineEventHandler(async (event) => {
   }
 
   if (photoPart?.data) {
-    const MAX_PHOTO_SIZE = 600 * 1024 // 600KB — fits in Firestore doc after base64 overhead
+    const MAX_PHOTO_SIZE = 600 * 1024
     const ALLOWED_PHOTO = ['image/jpeg', 'image/png', 'image/webp']
     if (photoPart.data.length > MAX_PHOTO_SIZE)
       throw createError({ statusCode: 413, message: 'Foto terlalu besar (maks 600KB). Kompres terlebih dahulu.' })
@@ -39,7 +39,6 @@ export default defineEventHandler(async (event) => {
 
   const config = useRuntimeConfig()
 
-  // ── AI processing ────────────────────────────────────────────────────────
   let transcript = ''
   let groqSuccess = false
 
@@ -47,7 +46,9 @@ export default defineEventHandler(async (event) => {
     try {
       transcript = await transcribeAudio(audioPart.data, config.groqApiKey as string)
       groqSuccess = true
-    } catch {}
+    } catch (e) {
+      console.error('[WHISPER_FAILED]', e)
+    }
   } else if (textPart?.data) {
     transcript = textPart.data.toString()
     groqSuccess = true
@@ -55,7 +56,7 @@ export default defineEventHandler(async (event) => {
 
   let extracted: any = {
     disaster_type: 'LAINNYA',
-    location_text: groqSuccess ? 'FALLBACK_SYSTEM' : 'LOKASI VERBAL NIHIL (Lacak via Pin Peta)',
+    location_text: 'LOKASI VERBAL NIHIL (Lacak via Pin Peta)',
     victim_count_estimated: null,
     victim_status: 'TIDAK_DIKETAHUI',
     infrastructure_damage: false,
@@ -73,7 +74,9 @@ export default defineEventHandler(async (event) => {
   if (groqSuccess) {
     try {
       extracted = await analyzeEmergency(transcript, config.geminiApiKey as string)
-    } catch {}
+    } catch (e) {
+      console.error('[GEMINI_FAILED]', e)
+    }
   }
 
   if (extracted.location_text === 'TIDAK_SPESIFIK') {
@@ -93,7 +96,6 @@ export default defineEventHandler(async (event) => {
     finalAudioUrl = `data:${audioPart.type};base64,${audioPart.data.toString('base64')}`
   }
 
-  // ── Save main report document (NO photoUrl base64 here) ──────────────────
   const db = getFirestoreDb()
 
   const reportData: any = {
@@ -123,7 +125,6 @@ export default defineEventHandler(async (event) => {
   const docRef = await db.collection('reports').add(reportData)
   const reportId = docRef.id
 
-  // ── Save photo to separate collection, same ID as report ─────────────────
   let photoUrl: string | null = null
 
   if (photoPart?.data && photoPart.type) {
@@ -136,6 +137,6 @@ export default defineEventHandler(async (event) => {
     id: reportId,
     ...reportData,
     hasPhoto: !!photoUrl,
-    photoUrl, 
+    photoUrl,
   }
 })
