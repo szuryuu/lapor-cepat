@@ -116,7 +116,7 @@ import { useReportHistory } from '~/composables/useReportHistory'
 
 const route = useRoute()
 const { data: report, pending } = await useFetch<Report>(`/api/reports/${route.params.id}`)
-const { saveReport } = useReportHistory()
+const { save: saveReport } = useReportHistory()
 const isSubmitting = ref(false)
 const isEditing = ref(false)
 
@@ -157,7 +157,8 @@ async function confirmReport() {
     }
 
     navigateTo(`/status/${route.params.id}`)
-  } catch {
+  } catch (e) {
+    console.error('[CONFIRM_REPORT]', e)
     isSubmitting.value = false
   }
 }
