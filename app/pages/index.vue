@@ -13,17 +13,17 @@
         Lapor Bencana<br/><span class="text-red-600">Dalam Detik.</span>
       </h1>
       <p class="text-sm font-bold text-slate-600 max-w-lg leading-relaxed border-l-4 border-red-600 pl-3">
-        Bicara — AI kami mengekstrak lokasi, korban, dan tingkat ancaman secara otomatis, lalu mengirimkannya langsung ke layar Tim Reaksi Cepat BPBD secara real-time.
+        Bicara saja. AI kami langsung mengekstrak lokasi, jumlah korban, dan tingkat ancaman, lalu mengirimkannya ke layar Tim Reaksi Cepat BPBD secara real-time.
       </p>
       <div class="flex flex-wrap gap-3 pt-2 border-t-2 border-slate-100">
         <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-600">
-          <div class="w-2 h-2 bg-green-500 rounded-full"></div> Whisper AI — Transkripsi Suara
+          <div class="w-2 h-2 bg-green-500 rounded-full"></div> Suara langsung ditranskripsi AI
         </div>
         <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-600">
-          <div class="w-2 h-2 bg-blue-500 rounded-full"></div> Gemini 2.5 — Triage Otomatis
+          <div class="w-2 h-2 bg-blue-500 rounded-full"></div> Prioritas ditentukan otomatis
         </div>
         <div class="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-600">
-          <div class="w-2 h-2 bg-orange-500 rounded-full"></div> Firestore — Realtime Dashboard
+          <div class="w-2 h-2 bg-orange-500 rounded-full"></div> Dashboard operator update real-time
         </div>
       </div>
     </div>
@@ -39,33 +39,33 @@
       </div>
       <div class="bg-white border-2 border-slate-900 p-4 flex flex-col gap-1 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)]">
         <span class="text-3xl font-black text-slate-900 leading-none">&lt;30s</span>
-        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-snug">Dari suara ke dashboard operator</span>
+        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-snug">Dari suara ke layar operator</span>
       </div>
       <div class="bg-white border-2 border-slate-900 p-4 flex flex-col gap-1 shadow-[4px_4px_0px_0px_rgba(15,23,42,1)]">
         <span class="text-3xl font-black text-slate-900 leading-none">4</span>
-        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-snug">Level prioritas triage otomatis AI</span>
+        <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest leading-snug">Level prioritas darurat otomatis</span>
       </div>
     </div>
 
     <div class="bg-white border-2 border-slate-900 p-5 flex flex-col gap-4">
-      <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 border-b-2 border-slate-100 pb-3">Bagaimana AI Bekerja</span>
+      <span class="text-[10px] font-black uppercase tracking-widest text-slate-500 border-b-2 border-slate-100 pb-3">Bagaimana Cara Kerjanya</span>
       <div class="flex flex-col md:flex-row gap-2 items-stretch">
         <div class="flex-1 bg-slate-50 border-2 border-slate-200 p-4 flex flex-col gap-2">
-          <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">01 INPUT</span>
-          <span class="font-black text-sm text-slate-900 uppercase">Suara / Teks + GPS</span>
-          <span class="text-[10px] font-bold text-slate-500 leading-relaxed">Warga bicara atau mengetik situasi darurat. GPS menarik koordinat presisi otomatis.</span>
+          <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">01 BICARA</span>
+          <span class="font-black text-sm text-slate-900 uppercase">Suara atau Teks + Lokasi</span>
+          <span class="text-[10px] font-bold text-slate-500 leading-relaxed">Ceritakan situasi darurat. Lokasi terdeteksi otomatis dari GPS perangkat Anda.</span>
         </div>
         <div class="hidden md:flex items-center text-slate-300 font-black text-xl px-1">→</div>
         <div class="flex-1 bg-slate-50 border-2 border-slate-200 p-4 flex flex-col gap-2">
-          <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">02 PROSES</span>
-          <span class="font-black text-sm text-slate-900 uppercase">Whisper → Gemini</span>
-          <span class="text-[10px] font-bold text-slate-500 leading-relaxed">Suara ditranskripsi, lalu LLM mengekstrak jenis bencana, korban, dan skor urgensi.</span>
+          <span class="text-[10px] font-black uppercase tracking-widest text-slate-400">02 ANALISIS AI</span>
+          <span class="font-black text-sm text-slate-900 uppercase">Ekstraksi Otomatis</span>
+          <span class="text-[10px] font-bold text-slate-500 leading-relaxed">AI mengekstrak jenis bencana, estimasi korban, dan tingkat urgensi dari laporan Anda.</span>
         </div>
         <div class="hidden md:flex items-center text-slate-300 font-black text-xl px-1">→</div>
         <div class="flex-1 bg-red-50 border-2 border-red-200 p-4 flex flex-col gap-2">
-          <span class="text-[10px] font-black uppercase tracking-widest text-red-400">03 OUTPUT</span>
-          <span class="font-black text-sm text-slate-900 uppercase">Dashboard TRC</span>
-          <span class="text-[10px] font-bold text-slate-500 leading-relaxed">Laporan terstruktur muncul di layar operator BPBD secara real-time dengan level prioritas.</span>
+          <span class="text-[10px] font-black uppercase tracking-widest text-red-400">03 SAMPAI</span>
+          <span class="font-black text-sm text-slate-900 uppercase">Tim Reaksi Cepat</span>
+          <span class="text-[10px] font-bold text-slate-500 leading-relaxed">Laporan terstruktur langsung muncul di layar operator BPBD dengan level prioritas.</span>
         </div>
       </div>
     </div>
@@ -92,22 +92,22 @@
         <div class="bg-slate-900 w-8 h-8 flex items-center justify-center border-2 border-slate-900">
           <MapPin class="w-4 h-4 text-white" />
         </div>
-        <h2 class="font-black text-sm uppercase tracking-widest text-slate-900">Geospasial Presisi</h2>
-        <p class="text-xs font-bold text-slate-500 leading-relaxed">GPS browser dengan fallback IP geolocation. Koordinat real dikirim ke peta operator secara otomatis.</p>
+        <h2 class="font-black text-sm uppercase tracking-widest text-slate-900">Lokasi Otomatis</h2>
+        <p class="text-xs font-bold text-slate-500 leading-relaxed">GPS aktif otomatis saat membuka halaman laporan. Tidak perlu mengetik alamat.</p>
       </div>
       <div class="bg-white border-2 border-slate-900 p-5 flex flex-col gap-3">
         <div class="bg-red-600 w-8 h-8 flex items-center justify-center border-2 border-slate-900">
           <Mic class="w-4 h-4 text-white" />
         </div>
-        <h2 class="font-black text-sm uppercase tracking-widest text-slate-900">Voice-First</h2>
-        <p class="text-xs font-bold text-slate-500 leading-relaxed">Dirancang untuk kondisi panik. Warga cukup bicara — tidak perlu mengetik atau mengisi form apapun.</p>
+        <h2 class="font-black text-sm uppercase tracking-widest text-slate-900">Cukup Bicara</h2>
+        <p class="text-xs font-bold text-slate-500 leading-relaxed">Dirancang untuk kondisi panik. Tidak perlu mengetik atau mengisi formulir apapun.</p>
       </div>
       <div class="bg-white border-2 border-slate-900 p-5 flex flex-col gap-3">
         <div class="bg-orange-500 w-8 h-8 flex items-center justify-center border-2 border-slate-900">
           <ShieldAlert class="w-4 h-4 text-white" />
         </div>
-        <h2 class="font-black text-sm uppercase tracking-widest text-slate-900">Anti-Hoax AI</h2>
-        <p class="text-xs font-bold text-slate-500 leading-relaxed">Gemini mendeteksi laporan palsu atau anomali secara otomatis sebelum laporan masuk ke antrean operator.</p>
+        <h2 class="font-black text-sm uppercase tracking-widest text-slate-900">Terverifikasi AI</h2>
+        <p class="text-xs font-bold text-slate-500 leading-relaxed">AI mendeteksi laporan palsu secara otomatis sebelum laporan masuk ke antrean operator.</p>
       </div>
     </div>
 
@@ -169,7 +169,7 @@ import { useReportHistory } from '~/composables/useReportHistory'
 
 useSeoMeta({
   title: 'LaporCepat — Sistem Pelaporan Darurat Bencana Berbasis AI',
-  description: 'Portal pelaporan bencana warga dengan AI triage otomatis. Bicara — AI mengekstrak lokasi, korban, dan prioritas secara real-time ke dashboard BPBD.'
+  description: 'Portal pelaporan bencana warga dengan AI triage otomatis. Bicara saja dan laporan langsung sampai ke Tim Reaksi Cepat BPBD secara real-time.'
 })
 
 const trackId = ref('')
