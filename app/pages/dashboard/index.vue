@@ -23,6 +23,13 @@
             <span class="text-3xl font-black leading-none">{{ stats.pending }}</span>
           </div>
         </div>
+        <div class="bg-white border-2 border-slate-900 px-5 py-4 flex flex-col min-w-[140px] justify-center">
+          <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full animate-pulse" :class="isPolling ? 'bg-green-500' : 'bg-slate-400'"></span>
+            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ isPolling ? 'Live' : 'Offline' }}</span>
+          </div>
+          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Refresh tiap 5 detik</span>
+        </div>
       </div>
 
       <div class="bg-slate-200 p-1 flex border-2 border-slate-900 w-full xl:w-auto overflow-x-auto">
@@ -75,9 +82,10 @@ const filterOptions: { label: string, value: FilterStatus }[] = [
 ]
 
 const allReports = ref<Report[]>([])
-let eventSource: EventSource | null = null
+const isPolling = ref(false)
 const knownIds = new Set<string>()
 let isInitialized = false
+let pollInterval: ReturnType<typeof setInterval> | null = null
 
 function playAlert() {
   try {
@@ -99,14 +107,14 @@ function playAlert() {
   } catch (e) {}
 }
 
-onMounted(() => {
-  eventSource = new EventSource('/api/reports/stream', { withCredentials: true })
-  eventSource.onmessage = (event) => {
-    const data: Report[] = JSON.parse(event.data)
-    
+async function fetchReports() {
+  try {
+    const data = await $fetch<Report[]>('/api/reports', { query: { status: 'ALL' } })
+    const reports = data.filter((r: Report) => r.status !== 'DRAFT')
+
     if (isInitialized) {
       let hasNewPending = false
-      data.forEach(r => {
+      reports.forEach((r: Report) => {
         if (!knownIds.has(r.id)) {
           knownIds.add(r.id)
           if (r.status === 'PENDING') hasNewPending = true
@@ -114,16 +122,24 @@ onMounted(() => {
       })
       if (hasNewPending) playAlert()
     } else {
-      data.forEach(r => knownIds.add(r.id))
+      reports.forEach((r: Report) => knownIds.add(r.id))
       isInitialized = true
     }
 
-    allReports.value = data
+    allReports.value = reports
+    isPolling.value = true
+  } catch (e) {
+    isPolling.value = false
   }
+}
+
+onMounted(() => {
+  fetchReports()
+  pollInterval = setInterval(fetchReports, 5000)
 })
 
 onUnmounted(() => {
-  if (eventSource) eventSource.close()
+  if (pollInterval) clearInterval(pollInterval)
 })
 
 const filteredReports = computed(() => {
@@ -144,5 +160,6 @@ const stats = computed(() => {
 
 async function dispatchReport(id: string) {
   await $fetch(`/api/reports/${id}`, { method: 'PATCH', body: { status: 'DISPATCHED' } })
+  await fetchReports()
 }
 </script>
