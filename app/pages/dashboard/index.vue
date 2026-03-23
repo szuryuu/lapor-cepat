@@ -1,43 +1,49 @@
 <template>
   <div class="flex flex-col gap-6 p-2 md:p-0">
     <div class="flex flex-col xl:flex-row xl:items-end justify-between gap-4">
-      <div class="flex flex-wrap gap-3">
-        <div class="bg-white border-2 border-slate-900 px-5 py-4 flex flex-col min-w-[140px]">
-          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Kritis (Lvl 5)</span>
-          <div class="flex items-center gap-2 text-red-600">
-            <AlertOctagon class="w-6 h-6" />
-            <span class="text-3xl font-black leading-none">{{ stats.critical }}</span>
-          </div>
-        </div>
-        <div class="bg-white border-2 border-slate-900 px-5 py-4 flex flex-col min-w-[140px]">
-          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Tinggi (Lvl 4)</span>
-          <div class="flex items-center gap-2 text-orange-600">
-            <AlertTriangle class="w-6 h-6" />
-            <span class="text-3xl font-black leading-none">{{ stats.high }}</span>
-          </div>
-        </div>
-        <div class="bg-white border-2 border-slate-900 px-5 py-4 flex flex-col min-w-[140px]">
-          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Menunggu</span>
-          <div class="flex items-center gap-2 text-slate-900">
-            <Clock class="w-6 h-6" />
-            <span class="text-3xl font-black leading-none">{{ stats.pending }}</span>
-          </div>
-        </div>
-        <div class="bg-white border-2 border-slate-900 px-5 py-4 flex flex-col min-w-[140px] justify-center">
-          <div class="flex items-center gap-2">
-            <span class="w-2 h-2 rounded-full animate-pulse" :class="isPolling ? 'bg-green-500' : 'bg-slate-400'"></span>
-            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">{{ isPolling ? 'Live' : 'Offline' }}</span>
-          </div>
-          <span class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Refresh tiap 5 detik</span>
-        </div>
+
+      <div class="fixed top-4 right-4 z-50 flex items-center gap-2 bg-white border-2 border-slate-900 px-3 py-2 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]">
+        <span class="w-2 h-2 rounded-full shrink-0 animate-pulse" :class="isPolling ? 'bg-green-500' : 'bg-slate-400'"></span>
+        <span class="text-[10px] font-bold uppercase tracking-widest" :class="isPolling ? 'text-green-600' : 'text-slate-500'">
+          {{ isPolling ? 'Live' : 'Offline' }}
+        </span>
       </div>
 
+      <div class="grid grid-cols-3 sm:flex sm:flex-wrap gap-3">
+        <div class="bg-white border-2 border-slate-900 px-4 py-3 flex flex-col">
+          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Kritis</span>
+          <div class="flex items-center gap-2 text-red-600">
+            <AlertOctagon class="w-5 h-5" />
+            <span class="text-2xl font-black leading-none">{{ stats.critical }}</span>
+          </div>
+        </div>
+
+        <div class="bg-white border-2 border-slate-900 px-4 py-3 flex flex-col">
+          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Tinggi</span>
+          <div class="flex items-center gap-2 text-orange-600">
+            <AlertTriangle class="w-5 h-5" />
+            <span class="text-2xl font-black leading-none">{{ stats.high }}</span>
+          </div>
+        </div>
+
+        <div class="bg-white border-2 border-slate-900 px-4 py-3 flex flex-col">
+          <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Menunggu</span>
+          <div class="flex items-center gap-2 text-slate-900">
+            <Clock class="w-5 h-5" />
+            <span class="text-2xl font-black leading-none">{{ stats.pending }}</span>
+          </div>
+        </div>
+
+
+      </div>
+
+      <!-- Filter tabs -->
       <div class="bg-slate-200 p-1 flex border-2 border-slate-900 w-full xl:w-auto overflow-x-auto">
-        <button 
-          v-for="f in filterOptions" 
-          :key="f.value" 
-          @click="filter = f.value" 
-          class="flex-1 xl:flex-none px-6 py-3 text-[10px] font-bold uppercase tracking-widest transition-colors whitespace-nowrap" 
+        <button
+          v-for="f in filterOptions"
+          :key="f.value"
+          @click="filter = f.value"
+          class="flex-1 xl:flex-none px-4 py-3 text-[10px] font-bold uppercase tracking-widest transition-colors whitespace-nowrap"
           :class="filter === f.value ? 'bg-slate-900 text-white' : 'text-slate-600 hover:bg-slate-300'"
         >
           {{ f.label }}
@@ -52,12 +58,12 @@
     </div>
 
     <div v-else class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
-      <DashboardTriageCard 
-        v-for="report in filteredReports" 
-        :key="report.id" 
-        :report="report" 
-        @dispatch="dispatchReport" 
-        @view="id => navigateTo(`/dashboard/laporan/${id}`)" 
+      <DashboardTriageCard
+        v-for="report in filteredReports"
+        :key="report.id"
+        :report="report"
+        @dispatch="dispatchReport"
+        @view="id => navigateTo(`/dashboard/laporan/${id}`)"
       />
     </div>
   </div>
@@ -78,7 +84,7 @@ const filterOptions: { label: string, value: FilterStatus }[] = [
   { label: 'Menunggu', value: 'PENDING' },
   { label: 'Diproses', value: 'DISPATCHED' },
   { label: 'Selesai', value: 'RESOLVED' },
-  { label: 'Semua Data', value: 'ALL' }
+  { label: 'Semua', value: 'ALL' }
 ]
 
 const allReports = ref<Report[]>([])
@@ -150,7 +156,6 @@ const filteredReports = computed(() => {
 const stats = computed(() => {
   const reports = allReports.value || []
   const activeReports = reports.filter(r => r.status !== 'RESOLVED')
-  
   return {
     critical: activeReports.filter(r => r.priority === 'CRITICAL').length,
     high: activeReports.filter(r => r.priority === 'HIGH').length,
