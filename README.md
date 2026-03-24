@@ -10,7 +10,7 @@
 
 Indonesia ranks second among the most disaster-prone countries in the world with a vulnerability score of 43.5%. Yet the existing emergency reporting system still relies on manual phone calls to BPBD call centers: slow, prone to miscommunication, and unstructured.
 
-**LaporCepat** was built to answer one question: *how can a panicked citizen accurately convey an emergency situation to the response team, as fast as possible?*
+**LaporCepat** was built to answer one question: _how can a panicked citizen accurately convey an emergency situation to the response team, as fast as possible?_
 
 ---
 
@@ -34,6 +34,7 @@ Citizens do not need to fill out forms. They simply **speak** and AI handles the
 ## Key Features
 
 **Citizen Portal (`/lapor`)**
+
 - Voice recording directly in the browser, transcribed via Whisper Large V3
 - Text mode (silent) for situations where speaking is not possible
 - Automatic GPS with fallback to IP geolocation
@@ -42,6 +43,7 @@ Citizens do not need to fill out forms. They simply **speak** and AI handles the
 - Evacuation status tracking via report ID
 
 **BPBD Dashboard (`/dashboard`)**
+
 - Real-time triage queue via Server-Sent Events (Firestore `onSnapshot`)
 - Automatic audio alert when a new critical report arrives
 - Status filters: Pending / Dispatched / Resolved
@@ -53,16 +55,16 @@ Citizens do not need to fill out forms. They simply **speak** and AI handles the
 
 ## Technical Architecture
 
-| Layer | Technology |
-|-------|------------|
-| Frontend | Nuxt 4, Vue 3, Tailwind CSS |
-| AI Speech-to-Text | Groq Whisper Large V3 |
-| AI Triage and Analysis | Google Gemini 2.5 Flash |
-| Database | Firebase Firestore |
-| Realtime | Server-Sent Events + Firestore onSnapshot |
-| Geolocation | Browser GPS API + IP Geolocation fallback |
-| Map | Leaflet.js + OpenStreetMap (CartoDB) |
-| Deployment | Vercel (Serverless Node.js) |
+| Layer                  | Technology                                |
+| ---------------------- | ----------------------------------------- |
+| Frontend               | Nuxt 4, Vue 3, Tailwind CSS               |
+| AI Speech-to-Text      | Groq Whisper Large V3                     |
+| AI Triage and Analysis | Google Gemini 2.5 Flash                   |
+| Database               | Firebase Firestore                        |
+| Realtime               | Server-Sent Events + Firestore onSnapshot |
+| Geolocation            | Browser GPS API + IP Geolocation fallback |
+| Map                    | Leaflet.js + OpenStreetMap (CartoDB)      |
+| Deployment             | Vercel (Serverless Node.js)               |
 
 ---
 
@@ -84,14 +86,14 @@ Citizens do not need to fill out forms. They simply **speak** and AI handles the
 # Clone and install
 git clone https://github.com/szuryuu/lapor-cepat
 cd lapor-cepat
-npm install
+bun install
 
 # Setup environment
 cp .env.example .env
 # Fill in all variables in .env
 
 # Run dev server
-npm run dev
+bun run dev
 ```
 
 ### Environment Variables
