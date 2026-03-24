@@ -12,12 +12,20 @@
     </div>
 
     <div class="h-[60vh] min-h-[500px] border-2 border-slate-900 bg-slate-200 relative z-0 flex flex-col">
+      <div
+        v-if="isPending"
+        class="absolute inset-0 z-10 bg-slate-50 flex flex-col items-center justify-center gap-4"
+      >
+        <Loader2 class="w-10 h-10 animate-spin text-slate-900" />
+        <p class="font-bold text-xs uppercase tracking-widest text-slate-500">Memuat Data Laporan...</p>
+      </div>
+
       <ClientOnly>
         <MapView :reports="activeReports" class="flex-1" />
         <template #fallback>
           <div class="absolute inset-0 flex flex-col items-center justify-center bg-slate-50">
             <Loader2 class="w-10 h-10 animate-spin text-slate-900 mb-4" />
-            <p class="font-bold text-xs uppercase tracking-widest text-slate-500">Mengunduh Data Satelit...</p>
+            <p class="font-bold text-xs uppercase tracking-widest text-slate-500">Memuat Peta...</p>
           </div>
         </template>
       </ClientOnly>
@@ -25,7 +33,11 @@
 
     <div class="bg-white border-2 border-slate-900 p-5 flex flex-wrap gap-6 items-center justify-center">
       <div v-for="item in legendItems" :key="item.label" class="flex items-center gap-2">
-        <div class="w-4 h-4 border-2 border-slate-900" :class="item.colorClass"></div>
+        <div
+          class="w-4 h-4 rounded-full border-2 border-slate-900"
+          :class="item.colorClass"
+          :style="item.dashed ? 'border-style: dashed;' : ''"
+        ></div>
         <span class="font-bold text-xs uppercase tracking-widest text-slate-700">{{ item.label }}</span>
       </div>
     </div>
@@ -33,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted, onUnmounted } from 'vue'
+import { computed, onMounted, onUnmounted, ref } from 'vue'
 import { MapPin, Loader2 } from 'lucide-vue-next'
 import type { Report } from '~/types/report'
 import MapView from '~/components/dashboard/MapView.client.vue'
@@ -41,7 +53,12 @@ import MapView from '~/components/dashboard/MapView.client.vue'
 definePageMeta({ layout: 'dashboard' })
 useSeoMeta({ title: 'Peta Spasial — BPBD' })
 
-const { data: allReports, refresh } = await useFetch<Report[]>('/api/reports', { query: { status: 'ALL' } })
+const isPending = ref(true)
+const { data: allReports, refresh } = await useFetch<Report[]>('/api/reports', {
+  query: { status: 'ALL' },
+  onResponse() { isPending.value = false },
+  onResponseError() { isPending.value = false }
+})
 
 const activeReports = computed(() => {
   if (!allReports.value) return []
@@ -49,10 +66,10 @@ const activeReports = computed(() => {
 })
 
 const legendItems = [
-  { colorClass: 'bg-red-600', label: 'Kritis' },
-  { colorClass: 'bg-orange-500', label: 'Tinggi' },
-  { colorClass: 'bg-yellow-400', label: 'Sedang' },
-  { colorClass: 'bg-green-500', label: 'Rendah' },
+  { colorClass: 'bg-red-600',    label: 'Kritis (Lvl 5)',   dashed: false },
+  { colorClass: 'bg-orange-500', label: 'Tinggi (Lvl 4)',   dashed: false },
+  { colorClass: 'bg-blue-500',   label: 'Menengah (Lvl 3)', dashed: false },
+  { colorClass: 'bg-slate-400',  label: 'Menunggu TRC',     dashed: true  },
 ]
 
 onMounted(() => {

@@ -1,14 +1,14 @@
 <template>
   <div class="flex flex-col gap-6 p-2 md:p-0">
+
+    <div class="fixed top-4 right-4 z-50 flex items-center gap-2 bg-white border-2 border-slate-900 px-3 py-2 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]">
+      <span class="w-2 h-2 rounded-full shrink-0 animate-pulse" :class="isPolling ? 'bg-green-500' : 'bg-slate-400'"></span>
+      <span class="text-[10px] font-bold uppercase tracking-widest" :class="isPolling ? 'text-green-600' : 'text-slate-500'">
+        {{ isPolling ? 'Live' : 'Memuat...' }}
+      </span>
+    </div>
+
     <div class="flex flex-col xl:flex-row xl:items-end justify-between gap-4">
-
-      <div class="fixed top-4 right-4 z-50 flex items-center gap-2 bg-white border-2 border-slate-900 px-3 py-2 shadow-[3px_3px_0px_0px_rgba(15,23,42,1)]">
-        <span class="w-2 h-2 rounded-full shrink-0 animate-pulse" :class="isPolling ? 'bg-green-500' : 'bg-slate-400'"></span>
-        <span class="text-[10px] font-bold uppercase tracking-widest" :class="isPolling ? 'text-green-600' : 'text-slate-500'">
-          {{ isPolling ? 'Live' : 'Offline' }}
-        </span>
-      </div>
-
       <div class="grid grid-cols-3 sm:flex sm:flex-wrap gap-3">
         <div class="bg-white border-2 border-slate-900 px-4 py-3 flex flex-col">
           <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Kritis</span>
@@ -17,7 +17,6 @@
             <span class="text-2xl font-black leading-none">{{ stats.critical }}</span>
           </div>
         </div>
-
         <div class="bg-white border-2 border-slate-900 px-4 py-3 flex flex-col">
           <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Tinggi</span>
           <div class="flex items-center gap-2 text-orange-600">
@@ -25,7 +24,6 @@
             <span class="text-2xl font-black leading-none">{{ stats.high }}</span>
           </div>
         </div>
-
         <div class="bg-white border-2 border-slate-900 px-4 py-3 flex flex-col">
           <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-1">Menunggu</span>
           <div class="flex items-center gap-2 text-slate-900">
@@ -33,11 +31,8 @@
             <span class="text-2xl font-black leading-none">{{ stats.pending }}</span>
           </div>
         </div>
-
-
       </div>
 
-      <!-- Filter tabs -->
       <div class="bg-slate-200 p-1 flex border-2 border-slate-900 w-full xl:w-auto overflow-x-auto">
         <button
           v-for="f in filterOptions"
@@ -51,7 +46,27 @@
       </div>
     </div>
 
-    <div v-if="!filteredReports?.length" class="bg-white border-2 border-slate-900 p-16 text-center flex flex-col items-center shadow-[8px_8px_0px_0px_rgba(15,23,42,1)]">
+    <div v-if="isInitialLoading" class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-3 gap-6">
+      <div v-for="i in 3" :key="i" class="bg-white border-2 border-slate-200 flex flex-col animate-pulse">
+        <div class="p-3 border-b-2 border-slate-100 flex justify-between items-center">
+          <div class="h-5 w-16 bg-slate-200 rounded"></div>
+          <div class="h-4 w-24 bg-slate-100 rounded"></div>
+        </div>
+        <div class="p-5 flex flex-col gap-4">
+          <div class="h-5 w-3/4 bg-slate-200 rounded"></div>
+          <div class="h-16 bg-slate-100 rounded border-2 border-slate-100"></div>
+          <div class="flex justify-between">
+            <div class="h-4 w-20 bg-slate-100 rounded"></div>
+            <div class="h-4 w-16 bg-slate-200 rounded"></div>
+          </div>
+        </div>
+        <div class="flex border-t-2 border-slate-100 mt-auto">
+          <div class="flex-1 h-12 bg-slate-100"></div>
+        </div>
+      </div>
+    </div>
+
+    <div v-else-if="!filteredReports?.length" class="bg-white border-2 border-slate-900 p-16 text-center flex flex-col items-center shadow-[8px_8px_0px_0px_rgba(15,23,42,1)]">
       <CheckCircle class="w-16 h-16 text-slate-300 mb-4" />
       <h3 class="text-2xl font-black text-slate-900 uppercase tracking-tight">Antrean Bersih</h3>
       <p class="text-slate-500 text-xs font-bold uppercase tracking-widest mt-2">Tidak ada laporan pada sektor ini.</p>
@@ -89,6 +104,7 @@ const filterOptions: { label: string, value: FilterStatus }[] = [
 
 const allReports = ref<Report[]>([])
 const isPolling = ref(false)
+const isInitialLoading = ref(true)
 const knownIds = new Set<string>()
 let isInitialized = false
 let pollInterval: ReturnType<typeof setInterval> | null = null
@@ -134,8 +150,10 @@ async function fetchReports() {
 
     allReports.value = reports
     isPolling.value = true
+    isInitialLoading.value = false
   } catch (e) {
     isPolling.value = false
+    isInitialLoading.value = false
   }
 }
 
